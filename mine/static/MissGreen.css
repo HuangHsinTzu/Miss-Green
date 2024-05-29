@@ -1,0 +1,94 @@
+.navbar-brand {
+  color: #727d6b;
+  font-weight: 1000;
+  font-size: xx-large;
+  font-family: "Sacramento", cursive;
+}
+.navbar-brand:hover {
+  color: #727d6b;
+  font-weight: 1000;
+  font-size: xx-large;
+  font-family: "Sacramento", cursive;
+}
+.navbar-brand:visited {
+  color: #727d6b;
+  font-weight: 1000;
+  font-size: xx-large;
+  font-family: "Sacramento", cursive;
+}
+.custom-icon-color {
+  color: #727d6b; /* Change the hex color code to your desired color */
+}
+.green-border-top {
+  border-top: 5px solid #9d9d78; /* Green color */
+}
+.navbar {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.navbar svg {
+  margin-right: 30px;
+}
+.a {
+  text-decoration: none;
+}
+#offcanvas-body div {
+  margin-left: 30px;
+}
+.inCart-buyNow {
+  color: white;
+  background-color: #727d6b;
+  cursor: pointer;
+  border-radius: 10px;
+  text-align: center;
+  float: right;
+  width: 200px;
+}
+.scroll-body {
+  overflow: auto; /* 设置为 auto 或 scroll 以便在内容溢出时显示滚动条 */
+}
+footer {
+  padding-left: 100px;
+}
+.btn:focus,
+.btn:active,
+.btn:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.green-border-top {
+  border-top: 5px solid #9d9d78; /* Green color */
+}
+.member_type {
+  margin-left: 30px;
+  margin-top: 30px;
+}
+.for_pwd {
+  margin-left: 320px;
+}
+/* 設置白色 div 容器 */
+.centered-div {
+  background-color: white; /* 白色背景 */
+  width: 450px; /* 設定寬度 */
+  height: 700px; /* 設定高度 */
+  position: absolute; /* 使用絕對定位 */
+  margin-top: 400px;
+  left: 50%; /* 水平居中 */
+  transform: translate(-50%, -50%); /* 使容器居中 */
+  padding: 20px; /* 增加內邊距 */
+}
+.parent-container {
+  height: auto; /* 自动调整父容器的高度 */
+  display: flex;
+  flex-direction: column; /* 子元素按列排列 */
+  min-height: 700px; /* 至少填满视口高度 */
+}
+.form-container {
+  background-color: transparent; /* 白色背景 */
+  width: 450px; /* 設定寬度 */
+  height: 750px; /* 設定高度 */
+  position: absolute; /* 使用絕對定位 */
+  margin-top: 450px;
+  left: 50%; /* 水平居中 */
+  transform: translate(-50%, -50%); /* 使容器居中 */
+  flex: 1;
+}

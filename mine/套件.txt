@@ -1,0 +1,6 @@
+pip install Flask-WTF
+pip install flask_migrate
+pip install flask_sqlalchemy
+pip install -U WTForms
+pip install email_validator
+pip install Flask-Login

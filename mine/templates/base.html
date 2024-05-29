@@ -1,0 +1,17 @@
+<!--所有頁面的基礎樣板-->
+
+<!-- Collect the nav links, forms, and other content for toggling -->
+<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+  <ul class="nav navbar-nav">
+    {% if current_user.is_authenticated %}
+    <!-- 透過url_for設定USERINFO連結綁定userinfo -->
+    <!--<li><a href="{{ url_for('userinfo') }}">USERINFO</a></li>-->
+    <!-- 透過url_for設定LOGOUT連結綁定LOGOUT -->
+    <li><a href="{{ url_for('logout') }}">LOGOUT</a></li>
+    {% else %}
+    <!-- 透過url_for設定LOGIN連結綁定LOGIN -->
+    <li><a href="{{ url_for('login') }}">LOGIN</a></li>
+  </ul>
+  {% endif %}
+</div>
+<!-- /.navbar-collapse -->
