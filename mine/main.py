@@ -245,28 +245,9 @@ def activitiesRegistration():
     
     elif request.method == 'GET':
         activities = Activity.query.all()
-
-        print("Activities list:")
-        for activity in activities:
-            print("Activity ID:", activity.id)
-            print("Activity image_url:", activity.image_url)
-            print("Activity Name:", activity.name)
-            print("Activity event_date:", activity.event_date)
-            print("Activity location:", activity.location)
-            print("Activity fee:", activity.fee)
-            print("Activity description:", activity.description)
-            print("Activity capacity:", activity.capacity)
-            print("Activity farmer_id:", activity.farmer_id)
-
-        """
-                for activity in activities:
-            activities_name = activity.name
-            activities_event_date = activity.event_date
-        """
-
         form = ActivitiesRegistrationForm()
         # 如果有錯誤，返回報名表單頁面並顯示錯誤信息
-        return render_template("ActivitiesRegistration.html", form=form)
+        return render_template("ActivitiesRegistration.html", form=form, activities=activities)
 
 @app.errorhandler(404)
 def page_not_found(e):
