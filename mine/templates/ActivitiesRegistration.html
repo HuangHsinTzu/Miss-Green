@@ -452,14 +452,14 @@
             console.log(activities);
 
             // 函數用於將活動信息顯示在頁面上
-            /*function displayRegisteredActivities(activities) {
+            function displayRegisteredActivities(activities) {
                 const activitiesList = document.getElementById('activitiesList');
                 activities.forEach(activity => {
                     const listItem = document.createElement('li');
                     listItem.innerHTML = `<b>姓名：</b> ${activity.name}, <b>電話：</b> ${activity.phone}, <b>郵箱：</b> ${activity.email}`;
                     activitiesList.appendChild(listItem);
                 });
-            }*/
+            }
 
             // 函數用於將活動信息顯示在卡片中
             function displayActivities(activities) {
@@ -481,7 +481,7 @@
                 });
             }
 
-            //displayRegisteredActivities(activities);
+            displayRegisteredActivities(activities);
             displayActivities(activities);
         }
 
