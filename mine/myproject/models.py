@@ -110,8 +110,6 @@ class Product(db.Model):
     category = db.Column(db.String(64), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=0)
     image_url = db.Column(db.String(256), nullable=False)
-
-    # 外鍵關係
     farmer_id = db.Column(db.Integer, db.ForeignKey('farmers.id'), nullable=False)
 
     def __init__(self, name, description, price, category, quantity, image_url, farmer_id):
@@ -227,4 +225,3 @@ class Activities_reg_rec(UserMixin, db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     activity_id = db.Column(db.Integer, db.ForeignKey('activities.id'))
 
-    #user = db.relationship('User', backref='Activities_reg_rec', uselist=False)
