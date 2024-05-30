@@ -446,49 +446,45 @@
       
     </div>
     <script>
-        // 當頁面加載完成後，向後端發送請求獲取成功報名的活動信息
         window.onload = function() {
-            fetch('/ActivitiesRegistration', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                // 將活動信息顯示在頁面上
-                displayRegisteredActivities(data.activities);
-            })
-            .catch(error => console.error('Error:', error));
+            const activities = {{ activities | tojson }};
+            
+            console.log(activities);
+
+            // 函數用於將活動信息顯示在頁面上
+            function displayRegisteredActivities(activities) {
+                const activitiesList = document.getElementById('activitiesList');
+                activities.forEach(activity => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `<b>姓名：</b> ${activity.name}, <b>電話：</b> ${activity.phone}, <b>郵箱：</b> ${activity.email}`;
+                    activitiesList.appendChild(listItem);
+                });
+            }
+
+            // 函數用於將活動信息顯示在卡片中
+            function displayActivities(activities) {
+                const cardContainer = document.getElementById('cardContainer');
+                console.log(activities);
+                activities.forEach(activity => {
+                    const card = document.createElement('div');
+                    card.classList.add('card', 'col');
+                    card.style.width = '18rem';
+                    card.innerHTML = `
+                        <img src="${activity.image_url}" class="card-img-top" alt="${activity.name}" />
+                        <div class="card-body">
+                            <h5 class="card-title">${activity.name}</h5>
+                            <p class="card-text">${new Date(activity.event_date).toLocaleDateString()}</p>
+                            <a href="#" class="btn register-btn" data-bs-toggle="modal" data-bs-target="#editModal">報名活動</a>
+                        </div>
+                    `;
+                    cardContainer.appendChild(card);
+                });
+            }
+
+            displayRegisteredActivities(activities);
+            displayActivities(activities);
         }
 
-        // 函數用於將活動信息顯示在頁面上
-        function displayRegisteredActivities(activities) {
-            const activitiesList = document.getElementById('activitiesList');
-            activities.forEach(activity => {
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `<b>姓名：</b> ${activity.name}, <b>電話：</b> ${activity.phone}, <b>郵箱：</b> ${activity.email}`;
-                activitiesList.appendChild(listItem);
-            });
-        }
-        // 函數用於將活動信息顯示在卡片中
-        function displayActivities(activities) {
-            const cardContainer = document.getElementById('cardContainer');
-            activities.forEach(activity => {
-                const card = document.createElement('div');
-                card.classList.add('card', 'col');
-                card.style.width = '18rem';
-                card.innerHTML = `
-                    <img src="${activity.image_url}" class="card-img-top" alt="${activity.name}" />
-                    <div class="card-body">
-                        <h5 class="card-title">${activity.name}</h5>
-                        <p class="card-text">${activity.event_date.strftime('%Y/%m/%d')}</p>
-                        <a href="#" class="btn register-btn" data-bs-toggle="modal" data-bs-target="#editModal">報名活動</a>
-                    </div>
-                `;
-                cardContainer.appendChild(card);
-            });
-        }
 
         // 在全局作用域中定义 saveActivity 函数
         function saveActivity() {
