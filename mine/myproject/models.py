@@ -24,6 +24,9 @@ class User(UserMixin, db.Model):
 
     # 定義與購物車的關聯
     cart = db.relationship('ShoppingCart', backref='user', uselist=False)
+    # user和活動成員關聯
+    Activities_reg_rec = db.relationship('Activities_reg_rec', backref='user', uselist=False)
+
     
     def __init__(self, email, username, password, phone):
         """初始化"""
@@ -37,7 +40,8 @@ class User(UserMixin, db.Model):
         return self.password == password 
 
     def add_Activity_mem(self, activities_member_name, activities_member_phone, activities_member_email):
-        new_ACtivity_mem = Activities_member(activities_member_id=self.id, activities_member_name=activities_member_name, activities_member_phone=activities_member_phone, activities_member_email=activities_member_email)
+        """報名活動"""
+        new_ACtivity_mem = Activities_reg_rec(activities_member_name=activities_member_name, activities_member_phone=activities_member_phone, activities_member_email=activities_member_email)
         db.session.add(new_ACtivity_mem)
 
         return new_ACtivity_mem
@@ -184,10 +188,37 @@ class Order(db.Model):
         self.quantity = quantity
 
 #活動報名
-class Activities_member(UserMixin, db.Model):
-    __tablename__ = 'activities_members'
-    activities_member_id = db.Column(db.Integer, primary_key = True)
+class Activities_reg_rec(UserMixin, db.Model):
+    __tablename__ = 'activities_reg_rec'
+    id = db.Column(db.Integer, primary_key = True)
     activities_member_name = db.Column(db.String(32), nullable = False)
     activities_member_phone = db.Column(db.String(32), nullable = False)
     activities_member_email = db.Column(db.String(32), nullable = False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    activity_id = db.Column(db.Integer, db.ForeignKey('activities.id'))
+
+#活動
+class Activity(db.Model):
+    __tablename__ = 'activities'
+    id = db.Column(db.Integer, primary_key=True)
+    image_url = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    event_date = db.Column(db.DateTime, nullable=False)
+    location = db.Column(db.String(100), nullable=False)
+    fee = db.Column(db.Float, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    capacity = db.Column(db.Integer, nullable = False)
+
+    farmer_id = db.Column(db.Integer, db.ForeignKey('farmers.id'), nullable=False)
+
+
+    def __init__(self, image_url, name, event_date, location, fee, description, capacity, farmer_id):
+        self.image_url = image_url
+        self.name = name
+        self.event_date = event_date
+        self.location = location
+        self.fee = fee
+        self.description = description
+        self.capacity = capacity
+        self.farmer_id = farmer_id
 

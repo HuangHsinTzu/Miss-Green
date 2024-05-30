@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from wtforms import ValidationError
 import os
 import traceback
-from myproject.models import User, db, login_manager, Product, Farmer, Activities_member
+from myproject.models import User, db, login_manager, Product, Farmer, Activities_reg_rec, Activity
 from myproject.forms import LoginForm, RegistrationForm, ActivitiesRegistrationForm
 from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
@@ -30,11 +30,15 @@ def home():
     if user_id:
         identity = session.get('identity')
         if identity == 'user':
-            return render_template('Index.html')
+            latest_products = Product.query.filter(Product.quantity > 0).order_by(Product.id.desc()).limit(8).all()
+            return render_template('Index.html', latest_products=latest_products)
         elif identity == 'farmer':
             return redirect(url_for('sellerHome'))
     else:
-        return render_template('Index.html')
+        # 查詢最後8個商品
+        latest_products = Product.query.filter(Product.quantity > 0).order_by(Product.id.desc()).limit(8).all()
+        return render_template('Index.html', latest_products=latest_products)
+
 
 # 農夫首頁(訂單管理)
 @app.route('/sellerHome')
@@ -202,10 +206,10 @@ def error():
 
 # 活動報名
 @app.route('/ActivitiesRegistration', methods=['GET', 'POST'])
+@login_required
 def activitiesRegistration():
-
-    form = ActivitiesRegistrationForm()
     if request.method == 'POST':
+        form = ActivitiesRegistrationForm()
         name = request.form.get('name')
         phone = request.form.get('phone')
         email = request.form.get('email')
@@ -215,24 +219,53 @@ def activitiesRegistration():
         if not all([name, phone, email]):
             return jsonify({'error': '所有欄位都是必填項'}), 400
         try: 
-            User = User()
-            new_Activity_mem = User.add_Activity_mem(name, phone, email)
+            # 使用当前登录用户的 ID 创建 User 的实例
+            user = db.session.get(User, current_user.id)
+            if not user:
+                return jsonify({'error': '用戶不存在'}), 404
+            new_Activity_mem = user.add_Activity_mem(name, phone, email)
             db.session.commit()
+
+            # 獲取使用者成功報名的活動
+            activities = Activities_reg_rec.query.filter_by(activities_member_email=user.email).all()
+
         except IntegrityError as e:
             db.session.rollback()
             print(f"Database error: {str(e)}")
             return jsonify({'error': '資料庫錯誤，無法添加活動會員'}), 500
         
-                # 将新商品信息返回给前端
+        # 将新商品信息返回给前端
         return jsonify({
             'id': new_Activity_mem.id,
-            'name': new_Activity_mem.name,
-            'phone': new_Activity_mem.phone,
-            'email': new_Activity_mem.email
+            'name': new_Activity_mem.activities_member_name,
+            'phone': new_Activity_mem.activities_member_phone,
+            'email': new_Activity_mem.activities_member_email,
+            'activities': [{'name': activity.activities_member_name, 'phone': activity.activities_member_phone, 'email': activity.activities_member_email} for activity in activities]
         }), 200
     
-    else:        
-    # 如果有錯誤，返回報名表單頁面並顯示錯誤信息
+    elif request.method == 'GET':
+        activities = Activity.query.all()
+
+        print("Activities list:")
+        for activity in activities:
+            print("Activity ID:", activity.id)
+            print("Activity image_url:", activity.image_url)
+            print("Activity Name:", activity.name)
+            print("Activity event_date:", activity.event_date)
+            print("Activity location:", activity.location)
+            print("Activity fee:", activity.fee)
+            print("Activity description:", activity.description)
+            print("Activity capacity:", activity.capacity)
+            print("Activity farmer_id:", activity.farmer_id)
+
+        """
+                for activity in activities:
+            activities_name = activity.name
+            activities_event_date = activity.event_date
+        """
+
+        form = ActivitiesRegistrationForm()
+        # 如果有錯誤，返回報名表單頁面並顯示錯誤信息
         return render_template("ActivitiesRegistration.html", form=form)
 
 @app.errorhandler(404)
