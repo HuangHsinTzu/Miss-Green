@@ -4,7 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Miss Green</title>
-    <link rel="icon" type="logoicon" href="static/resources/Miss Green Logo.ico" />
+    <link
+      rel="icon"
+      type="logoicon"
+      href="static/resources/Miss Green Logo.ico"
+    />
     <link rel="stylesheet" href="static/MissGreen.css" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -169,7 +173,7 @@
       class="navbar navbar-expand-lg bg-body-tertiary sticky-top green-border-top"
     >
       <div class="container-fluid">
-        <a class="navbar-brand" href="/">Miss Green</a>
+        <a class="navbar-brand" href="/SellerHome">Miss Green</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -187,7 +191,7 @@
               <a class="nav-link" href="/Upload">上架商品 | UPLOAD ITEMS</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#"
+              <a class="nav-link" href="/Add_activities"
                 >農場活動 | FARM ACTIVITIES</a
               >
             </li>
@@ -216,7 +220,6 @@
     </div>
 
     <div class="table">
-      
       <table class="table">
         <thead>
           <tr>
@@ -231,39 +234,33 @@
           </tr>
         </thead>
         <tbody>
-          <tr data-row-id="1">
-            <td>1</td>
+          {% for product in farmer_products %}
+          <tr data-row-id="{{ loop.index }}">
+            <td>{{ loop.index }}</td>
             <td>
-              <img src="#" alt="商品圖片" width="100" height="100" />
+              <img
+                src="{{ product.image_url }}"
+                alt="{{ product.name }}"
+                style="width: 50px; height: 50px"
+              />
             </td>
-            <td>有機馬鈴薯</td>
-            <td>$100</td>
-            <td>蔬菜</td>
-            <td>60</td>
-            <td>馬鈴薯好好吃</td>
+            <td>{{ product.name }}</td>
+            <td>${{ product.price }}</td>
+            <td>{{ product.category }}</td>
+            <td>{{ product.quantity }}</td>
+            <td>{{ product.description }}</td>
             <td>
-              <button class="edit-btn" onclick="editRow(1)">編輯</button>
-              <button class="delete-btn" onclick="deleteRow(1)">刪除</button>
-            </td>
-          </tr>
-          <tr data-row-id="2">
-            <td>2</td>
-            <td>
-              <img src="#" alt="商品圖片" width="100" height="100" />
-            </td>
-            <td>有機蘋果</td>
-            <td>$50</td>
-            <td>水果</td>
-            <td>8054</td>
-            <td>拉拉拉</td>
-            <td>
-              <button class="edit-btn" onclick="editRow(2)">編輯</button>
-              <button class="delete-btn" onclick="deleteRow(2)">刪除</button>
+              <button class="edit-btn" onclick="editRow({{ loop.index }});">
+                編輯
+              </button>
+              <button class="delete-btn" onclick="deleteRow({{ loop.index }});">
+                刪除
+              </button>
             </td>
           </tr>
+          {% endfor %}
         </tbody>
       </table>
-    
     </div>
 
     {% block script %}
@@ -319,13 +316,16 @@
         // 在行元素上存储原始数据，以便取消操作时使用
         row.originalData = originalData;
 
+        // 移除價格中的 $ 符號
+        var originalPrice = parseFloat(originalData.price.replace("$", ""));
+
         // 将单元格内容替换为输入框
-        cells[2].innerHTML = `<input type="text" class="form-control" id="editName" value="${originalData.name}">`;
-        cells[3].innerHTML = `<input type="text" class="form-control" id="editPrice" value="${originalData.price}">`;
+        cells[2].innerHTML = `<input type="text" class="form-control" id="editName" name="productname" value="${originalData.name}">`;
+        cells[3].innerHTML = `<input type="text" class="form-control" id="editPrice" name="price" value="${originalPrice}">`;
 
         // 创建选择框
         cells[4].innerHTML = `
-          <select id="editType" class="form-control">
+          <select id="editType" name="category" class="form-control">
               <option value="蔬菜" ${
                 originalData.type === "蔬菜" ? "selected" : ""
               }>蔬菜</option>
@@ -337,11 +337,11 @@
               }>蛋類</option>
           </select>`;
 
-        cells[5].innerHTML = `<input type="text" class="form-control" id="editQuantity" value="${originalData.quantity}">`;
-        cells[6].innerHTML = `<input type="text" class="form-control" id="editDescription" value="${originalData.description}">`;
+        cells[5].innerHTML = `<input type="text" class="form-control" id="editQuantity" name="quantity" value="${originalData.quantity}">`;
+        cells[6].innerHTML = `<input type="text" class="form-control" id="editDescription" name="description" value="${originalData.description}">`;
 
         // 替换图片为上传输入框
-        cells[1].innerHTML = `<input type="file" class="form-control" id="editImage">`;
+        cells[1].innerHTML = `<input type="file" class="form-control" id="editImage" name="image_file">`;
 
         // 替换编辑和删除按钮为完成和取消按钮
         cells[7].innerHTML = `
@@ -349,33 +349,8 @@
         <button class="cancel-btn" onclick="cancelEditRow(${rowId})">取消</button>`;
       }
 
-      function saveRow(rowId) {
-        // 获取表格行
-        var row = document.querySelector("tr[data-row-id='" + rowId + "']");
-
-        // 从输入框中获取值
-        var name = document.getElementById("editName").value;
-        var price = document.getElementById("editPrice").value;
-        var type = document.getElementById("editType").value;
-        var quantity = document.getElementById("editQuantity").value;
-        var description = document.getElementById("editDescription").value;
-
-        // 将输入值更新到单元格
-        row.querySelectorAll("td")[2].innerText = name;
-        row.querySelectorAll("td")[3].innerText = price;
-        row.querySelectorAll("td")[4].innerText = type;
-        row.querySelectorAll("td")[5].innerText = quantity;
-        row.querySelectorAll("td")[6].innerText = description;
-
-        // 替换 "完成" 按钮为 "编辑" 按钮
-        row.querySelectorAll("td")[7].innerHTML = `
-        <button class="edit-btn" onclick="editRow(${rowId})">編輯</button>
-        <button class="delete-btn" onclick="deleteRow(${rowId})">刪除</button>`;
-      }
-      
-      
       function addRow() {
-        console.log("addRow有被呼叫")
+        console.log("addRow有被呼叫");
         // 获取表格主体
         var tbody = document.querySelector("tbody");
 
@@ -404,7 +379,6 @@
             <button class="cancel-btn" onclick="cancelNewRow();">取消</button>
         </td>
         </form>`;
-        
 
         // 将新行添加到表格主体
         tbody.appendChild(newRow);
@@ -438,93 +412,70 @@
         // 获取上传的图片文件
         var file = fileInput.files[0];
 
-        // 创建一个 URL 对象来表示图片文件的 URL
-        var imageUrl = file ? URL.createObjectURL(file) : "";
-        
         var formData = new FormData();
-        formData.append('productname', name);
-        formData.append('description', description);
-        formData.append('price', price);
-        formData.append('category', type);
-        formData.append('quantity', quantity);
-        formData.append('image_url', imageUrl);
-
-        // 使用 Fetch API 发送 POST 请求到后端 Flask 路由
-        fetch('/Upload', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (response.ok) {
-                // 解析后端返回的 JSON 数据
-                console.log(response)
-                return response.json();
-            } else {
-                alert('添加商品失敗！');
-            }
-        })
-        
-        .catch(error => {
-            console.error('Error:', error);
-        });
-
-        // 将输入值更新到单元格
-        row.querySelectorAll("td")[2].innerText = name;
-        // 在价格前添加美元符号
-        row.querySelectorAll("td")[3].innerText = `$${price}`;
-        row.querySelectorAll("td")[4].innerText = type;
-        row.querySelectorAll("td")[5].innerText = quantity;
-        row.querySelectorAll("td")[6].innerText = description;
-
-        // 如果上传了图片，替换文件上传输入框为 `<img>` 元素
+        formData.append("productname", name);
+        formData.append("description", description);
+        formData.append("price", price);
+        formData.append("category", type);
+        formData.append("quantity", quantity);
         if (file) {
-          var imageCell = newRow.querySelectorAll("td")[1];
-          imageCell.innerHTML = `<img src="${imageUrl}" alt="${name}" style="width: 100px; height: 100px;">`;
+          formData.append("image_file", file);
         }
 
-        // 替换 "完成" 按钮为 "编辑" 按钮
-        row.querySelectorAll("td")[7].innerHTML = `
-        <button class="edit-btn" onclick="editRow(${rowId})">編輯</button>
-        <button class="delete-btn" onclick="deleteRow(${rowId})">刪除</button>`;
-      }
+        // 使用 Fetch API 发送 POST 请求到后端 Flask 路由
+        fetch("/Upload", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => {
+            if (response.ok) {
+              // 解析后端返回的 JSON 数据
+              console.log(response);
+              return response.json();
+            } else {
+              alert("添加商品失敗！");
+            }
+          })
 
-      function addNewRowToTable(data) {
-        // 获取表格主体
-        var tbody = document.querySelector("tbody");
+          .then((data) => {
+            // 将后端返回的值更新到单元格
+            newRow.querySelectorAll("td")[2].innerText = data.name;
+            // 在价格前添加货币符号
+            newRow.querySelectorAll("td")[3].innerText = `$${data.price}`;
+            newRow.querySelectorAll("td")[4].innerText = data.category;
+            newRow.querySelectorAll("td")[5].innerText = data.quantity;
+            newRow.querySelectorAll("td")[6].innerText = data.description;
 
-        // 创建新行
-        var newRow = document.createElement("tr");
-        // 添加唯一ID来标识新行
-        var newRowId = "row-" + (tbody.children.length + 1);
-        newRow.setAttribute("data-row-id", newRowId);
+            // 如果上传了图片，替换文件上传输入框为 <img> 元素
+            if (data.image_url) {
+              var imageCell = newRow.querySelectorAll("td")[1];
+              imageCell.innerHTML = `<img src="${data.image_url}" alt="${name}" style="width: 100px; height: 100px;">`;
+            }
 
-        // 添加单元格到新行
-        newRow.innerHTML = `
-          <td>${tbody.children.length + 1}</td>
-          <td><img src="${data.image_url}" alt="${data.name}" style="width: 100px; height: 100px;"></td>
-          <td>${data.name}</td>
-          <td>${'$' + data.price}</td>
-          <td>${data.category}</td>
-          <td>${data.quantity}</td>
-          <td>${data.description}</td>
-          <td>
-            <button class="edit-btn" onclick="editRow('${newRow.getAttribute(
-          "data-row-id")}')">編輯</button>
-            <button class="delete-btn" onclick="deleteRow('${newRow.getAttribute(
-          "data-row-id")}')">刪除</button>
-          </td>`;
+            // 替换 "完成" 按钮为 "编辑" 按钮
+            newRow.querySelectorAll("td")[7].innerHTML = `
+            <button class="edit-btn" onclick="editRow(${newRow.getAttribute(
+              "data-row-id"
+            )});">編輯</button>
+            <button class="delete-btn" onclick="deleteRow(${newRow.getAttribute(
+              "data-row-id"
+            )});">刪除</button>`;
+          })
 
-        // 将新行添加到表格主体
-          tbody.appendChild(newRow);
+          .catch((error) => {
+            console.error("Error:", error);
+          });
       }
 
       function saveRow(rowId) {
         // 获取特定 ID 的表格行
-        var row = document.querySelector(`tr[data-row-id='${rowId}']`);
+        var newRow = document.querySelector(`tr[data-row-id='${rowId}']`);
 
+        // 获取原始数据
+        var originalData = newRow.originalData;
 
         // 从输入框中获取值
-        var fileInput = document.getElementById("newImage");
+        var fileInput = document.getElementById("editImage");
         var name = document.getElementById("editName").value;
         var price = document.getElementById("editPrice").value;
         var type = document.getElementById("editType").value;
@@ -534,60 +485,77 @@
         // 获取上传的图片文件
         var file = fileInput.files[0];
 
-        // 创建一个 URL 对象来表示图片文件的 URL
-        var imageUrl = file ? URL.createObjectURL(file) : "";
-
         // 验证价格和数量是否为有效数字
         if (!isNumeric(price) && !isNumeric(quantity)) {
           alert("價錢及數量必須是有效的數字！");
           return;
         }
 
-         // 创建一个 FormData 对象，用于存储表单数据
-    var formData = new FormData();
-    formData.append('productname', name);
-    formData.append('description', description);
-    formData.append('price', price);
-    formData.append('category', type);
-    formData.append('quantity', quantity);
-    formData.append('image_url', fileInput.files[0]);
-
-    // 使用 Fetch API 发送 POST 请求到后端 Flask 路由
-    fetch('/Upload/reload', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (response.ok) {
-            // 重定向到商品列表页面或其他页面
-            // 這個地方你可以根據你的實際情況修改重定向的 URL
-            return response.formData;
-        } else {
-            alert('添加商品失敗！');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-
-        // 将输入值更新到单元格
-        row.querySelectorAll("td")[2].innerText = name;
-        // 在价格前添加美元符号
-        row.querySelectorAll("td")[3].innerText = `$${price}`;
-        row.querySelectorAll("td")[4].innerText = type;
-        row.querySelectorAll("td")[5].innerText = quantity;
-        row.querySelectorAll("td")[6].innerText = description;
-
-        // 如果上传了图片，替换文件上传输入框为 `<img>` 元素
+        // 创建一个 FormData 对象，用于存储表单数据
+        var formData = new FormData();
+        formData.append("productname", name);
+        formData.append("description", description);
+        formData.append("price", price);
+        formData.append("category", type);
+        formData.append("quantity", quantity);
         if (file) {
-          var imageCell = newRow.querySelectorAll("td")[1];
-          imageCell.innerHTML = `<img src="${imageUrl}" alt="${name}" style="width: 100px; height: 100px;">`;
+          formData.append("image_file", file);
         }
 
-        // 替换 "完成" 按钮为 "编辑" 按钮
-        row.querySelectorAll("td")[7].innerHTML = `
-        <button class="edit-btn" onclick="editRow(${rowId})">編輯</button>
-        <button class="delete-btn" onclick="deleteRow(${rowId})">刪除</button>`;
+        // 添加原始數據
+        formData.append("original_name", originalData.name);
+        formData.append("original_price", originalData.price);
+        formData.append("original_type", originalData.type);
+        formData.append("original_quantity", originalData.quantity);
+        formData.append("original_description", originalData.description);
+
+        // 使用 Fetch API 发送 POST 请求到后端 Flask 路由
+        fetch("/Upload/reload", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => {
+            if (response.ok) {
+              // 解析后端返回的 JSON 数据
+              console.log(response);
+              return response.json();
+            } else {
+              alert("更新商品失敗！");
+              return response.json();
+            }
+          })
+
+          .then((data) => {
+            // 将后端返回的值更新到单元格
+            newRow.querySelectorAll("td")[2].innerText = data.name;
+            // 在价格前添加货币符号
+            newRow.querySelectorAll("td")[3].innerText = `$${data.price}`;
+            newRow.querySelectorAll("td")[4].innerText = data.category;
+            newRow.querySelectorAll("td")[5].innerText = data.quantity;
+            newRow.querySelectorAll("td")[6].innerText = data.description;
+
+            // 如果上传了图片，替换文件上传输入框为 <img> 元素
+            if (data.image_url) {
+              var imageCell = newRow.querySelectorAll("td")[1];
+              imageCell.innerHTML = `<img src="${data.image_url}" alt="${data.name}" style="width: 100px; height: 100px;">`;
+            }
+
+            // 替换 "完成" 按钮为 "编辑" 按钮
+            newRow.querySelectorAll("td")[7].innerHTML = `
+            <button class="edit-btn" onclick="editRow(${newRow.getAttribute(
+              "data-row-id"
+            )});">編輯</button>
+            <button class="delete-btn" onclick="deleteRow(${newRow.getAttribute(
+              "data-row-id"
+            )});">刪除</button>`;
+
+            console.log(data);
+          })
+
+          .catch((error) => {
+            console.error("Error:", error);
+            console.log(error);
+          });
       }
 
       function cancelNewRow() {
@@ -603,14 +571,33 @@
         // 获取特定 ID 的行
         var row = document.querySelector(`tr[data-row-id='${rowId}']`);
 
-        // 删除该行
-        row.remove();
+        // 获取该行中商品的相关信息
+        var product = {
+          productname: row.querySelector("td:nth-child(3)").innerText, // 获取商品名称
+          description: row.querySelector("td:nth-child(7)").innerText,
+        };
+        // 发送请求到后端删除商品
+        fetch("/Delete_product", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(product),
+        })
+          .then((response) => {
+            if (response.ok) {
+              // 从页面中删除该行
+              row.remove();
+            } else {
+              alert("删除商品失败！");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
       }
-    
     </script>
-    
 
-    
     <script
       src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
       integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
