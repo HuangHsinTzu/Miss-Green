@@ -27,6 +27,18 @@
         background-color: rgb(244, 244, 244);
       }
 
+      /* 設置白色 div 容器 */
+      .centered-div {
+        background-color: white; /* 白色背景 */
+        width: 450px; /* 設定寬度 */
+        height: 610px; /* 設定高度 */
+        position: absolute; /* 使用絕對定位 */
+        margin-top: 300px;
+        left: 50%; /* 水平居中 */
+        transform: translate(-50%, -50%); /* 使容器居中 */
+        padding: 20px; /* 增加內邊距 */
+      }
+
       .text {
         /* 您可以根據需求調整 text 的樣式 */
         text-align: left; /* 左對齊文字 */
@@ -94,30 +106,28 @@
         margin-top: 50px;
         /*margin-top: 30px;*/
       }
+      .form-container {
+        background-color: transparent; /* 白色背景 */
+        width: 450px; /* 設定寬度 */
+        height: 680px; /* 設定高度 */
+        position: absolute; /* 使用絕對定位 */
+        margin-top: 400px;
+        left: 50%; /* 水平居中 */
+        transform: translate(-50%, -50%); /* 使容器居中 */
+        flex: 1;
+        overflow-y: auto; /* 如果内容容器超出视口高度，则允许滚动 */
+      }
+      .parent-container {
+        height: auto; /* 自动调整父容器的高度 */
+        display: flex;
+        flex-direction: column; /* 子元素按列排列 */
+        min-height: 680px; /* 至少填满视口高度 */
+      }
       .isfarmer {
         text-align: right;
         margin: 10px;
         margin-right: 30px;
       }
-            .navbar-brand {
-        color: #727d6b;
-        font-weight: 1000;
-        font-size: xx-large;
-        font-family: "Sacramento", cursive;
-      }
-      .navbar-brand:hover {
-        color: #727d6b;
-        font-weight: 1000;
-        font-size: xx-large;
-        font-family: "Sacramento", cursive;
-      }
-      .navbar-brand:visited {
-        color: #727d6b;
-        font-weight: 1000;
-        font-size: xx-large;
-        font-family: "Sacramento", cursive;
-      }
-
     </style>
   </head>
   <body>
@@ -265,7 +275,7 @@
             <div class="pwd-container">
               <input type="password" id="input-pwd" name="password" placeholder="密碼" />
             </div>
-            <div class="member_type">
+            <div class="checkbox">
               <label>
                 <input type="radio" id="user" name="identity" value="user" required/>
                 我是顧客
@@ -275,9 +285,12 @@
                 我是賣家
               </label>
             </div>
-            <a class = "for_pwd"href="#">忘記密碼?</a>
-            <br>
+            <a href="#">忘記密碼?</a>
             <input type="submit" class="login-button" value="登入 MissGreen !" style="font-weight: 600; cursor: pointer">
+            
+            <!--<div class="isfarmer">
+              <a href="">我是農夫</a>
+            </div>!-->
           </form>
           <!-- 將圖片包裹在一個 <div> 容器中 -->
           <div class="image-container">
