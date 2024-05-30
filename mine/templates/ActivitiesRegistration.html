@@ -205,7 +205,7 @@
       class="navbar navbar-expand-lg bg-body-tertiary sticky-top green-border-top"
     >
       <div class="container-fluid">
-        <a class="navbar-brand" href="Index.html">Miss Green</a>
+        <a class="navbar-brand" href="/Index">Miss Green</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -473,7 +473,7 @@
                         <img src="${activity.image_url}" class="card-img-top" alt="${activity.name}" />
                         <div class="card-body">
                             <h5 class="card-title">${activity.name}</h5>
-                            <p class="card-text">${new Date(activity.event_date).toLocaleDateString()}</p>
+                            <p class="card-text">${activity.event_date.strftime('%Y/%m/%d')}</p>
                             <a href="#" class="btn register-btn" data-bs-toggle="modal" data-bs-target="#editModal">報名活動</a>
                         </div>
                     `;
