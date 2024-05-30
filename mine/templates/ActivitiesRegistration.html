@@ -65,10 +65,21 @@
       }
 
       .card {
-        width: 250px;
-        height: 200px;
-        margin: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
       }
+      .card-img-container {
+        width: 100%;
+        height: 200px; /* Set the height for the image container */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+      }
+      
+      
       .modal-body a {
         color: black;
         text-decoration: underline;
@@ -181,7 +192,7 @@
       tr {
         cursor: pointer;
       }
-      .card-container {
+      #cardContainer {
         margin: 30px;
         margin-left: 80px;
       }
@@ -197,6 +208,12 @@
         background-color: #d9b300;
         color: black;
         font-weight: 600;
+      }
+      .row-cols-1 .col,
+      .row-cols-md-2 .col,
+      .row-cols-lg-4 .col {
+        margin-bottom: 1rem; /* Ensure spacing between rows */
+        margin-left: 1rem;
       }
     </style>
   </head>
@@ -399,7 +416,7 @@
           <!-- 這裡顯示成功報名的活動 -->
       </div>
   </div>
-    <div class="container mt-4" id="cardContainer">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="cardContainer">
       <!-- 顯示所有活動 -->
     </div>
     <div
@@ -464,9 +481,6 @@
         </div>
       </div>
     </div>
-    <div class="card-container">
-      
-    </div>
     <script>
         window.onload = function() {
             const activities = {{ activities | tojson }};
@@ -492,7 +506,9 @@
                     card.classList.add('card', 'col');
                     card.style.width = '18rem';
                     card.innerHTML = `
-                        <img src="${activity.image_url}" class="card-img-top" alt="${activity.name}" />
+                        <div class="card-img-container">
+                            <img src="${activity.image_url}" class="card-img-top" alt="${activity.name}" />
+                        </div>
                         <div class="card-body">
                             <h5 class="card-title">${activity.name}</h5>
                             <p class="card-text">${activity.event_date}</p>
