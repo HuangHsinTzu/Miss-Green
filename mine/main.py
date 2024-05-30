@@ -443,6 +443,7 @@ def activity_to_dict(activity):
     return {
         'id': activity.id,
         'name': activity.name,
+        'event_date':activity.event_date.strftime('%Y/%m/%d'),
         'description': activity.description,
         'fee': activity.fee,
         'image_url': activity.image_url,
