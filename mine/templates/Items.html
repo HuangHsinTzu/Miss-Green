@@ -42,16 +42,20 @@
         color: inherit; /* 继承父元素的颜色，以避免蓝色 */
       }
       div.item-container {
-        margin-left: 200px;
-        margin-top: 0px;
-        flex: 3;
+        display: flex;
+        flex-wrap: wrap; /* 允许换行 */
+        justify-content: flex-start; /* 靠左对齐 */
+        margin-left: 100px;
         margin-top: 30px;
-        float: right;
-        width: 92%;
+        width: calc(100% - 200px); /* 调整宽度，减去左边距 */
       }
       div.item-container div {
         width: 25%;
-        float: left;
+        box-sizing: border-box; /* 包括内边距和边框 */
+        padding: 10px; /* 增加间距 */
+        display: flex;
+        flex-direction: column; /* 垂直布局 */
+        align-items: center; /* 水平居中对齐 */
       }
       div.item-container a {
         text-decoration: none; /* 去除底线 */
@@ -61,19 +65,12 @@
         width: 240px;
         height: 230px;
       }
-      .item-image-mid {
-        width: 240px;
-        height: 230px;
-        margin-left: 5px;
-      }
-      .item-image-right {
-        width: 240px;
-        height: 230px;
-        margin-right: 10px;
-      }
-      .item-caption {
+      p.item-caption {
         text-align: center;
         margin-top: 5px;
+        white-space: nowrap; /* 禁止自动换行 */
+        overflow: hidden; /* 隐藏超出部分文本 */
+        text-overflow: ellipsis; /* 添加省略号以指示文本溢出 */
       }
       .nav_container {
         display: flex;
@@ -303,234 +300,18 @@
       <div class="side_nav">
         <p>分類</p>
         <a href="#veg">蔬菜</a>
+        <a href="#fruits">水果</a>
         <a href="#eggs">雞蛋</a>
-        <a href="#merch">原創商品</a>
       </div>
       <div class="products">
         <div class="item-container" id="veg">
-          <div id="veg1">
-            <a href="ProductDetail.html">
-              <img
-                src="resources/lars-blankers-B0s3Xndk6tw-unsplash.jpg"
-                class="item-image-left"
-                alt="..."
-              />
-              <!--<div
-                  class="add-to-cart"
-                  onclick="window.location.href='加入购物车链接';"
-                >
-                  加入購物車
-                </div>-->
-            </a>
-            <a href="ProductDetail.html">
-              <p class="item-caption">有機馬鈴薯<br />NT$100</p>
-            </a>
-          </div>
-          <div id="veg2">
-            <a href="ProductDetail.html">
-              <img
-                src="resources/lars-blankers-B0s3Xndk6tw-unsplash.jpg"
-                class="item-image-left"
-                alt="..."
-              />
-              <!--<div
-                class="add-to-cart"
-                onclick="window.location.href='加入购物车链接';"
-              >
-                加入購物車
-              </div>-->
-            </a>
-            <a href="ProductDetail.html">
-              <p class="item-caption">有機馬鈴薯<br />NT$100</p>
-            </a>
-          </div>
-          <div id="veg3">
-            <a href="ProductDetail.html">
-              <img
-                src="resources/lars-blankers-B0s3Xndk6tw-unsplash.jpg"
-                class="item-image-left"
-                alt="..."
-              />
-              <!--<div
-                class="add-to-cart"
-                onclick="window.location.href='加入购物车链接';"
-              >
-                加入購物車
-              </div>-->
-            </a>
-            <a href="ProductDetail.html">
-              <p class="item-caption">有機馬鈴薯<br />NT$100</p>
-            </a>
-          </div>
-          <div id="veg4">
-            <a href="ProductDetail.html">
-              <img
-                src="resources/lars-blankers-B0s3Xndk6tw-unsplash.jpg"
-                class="item-image-left"
-                alt="..."
-              />
-              <!--<div
-                class="add-to-cart"
-                onclick="window.location.href='加入购物车链接';"
-              >
-                加入購物車
-              </div>-->
-            </a>
-            <a href="ProductDetail.html">
-              <p class="item-caption">有機馬鈴薯<br />NT$100</p>
-            </a>
-          </div>
+          <!-- 動態生成蔬菜商品 -->
+        </div>
+        <div class="item-container" id="fruits">
+          <!-- 動態生成水果商品 -->
         </div>
         <div class="item-container" id="eggs">
-          <div id="egg1">
-            <a href="ProductDetail.html">
-              <img
-                src="resources/lars-blankers-B0s3Xndk6tw-unsplash.jpg"
-                class="item-image-left"
-                alt="..."
-              />
-              <!--<div
-                class="add-to-cart"
-                onclick="window.location.href='加入购物车链接';"
-              >
-                加入購物車
-              </div>-->
-            </a>
-            <a href="ProductDetail.html">
-              <p class="item-caption">有機馬鈴薯<br />NT$100</p>
-            </a>
-          </div>
-          <div id="egg2">
-            <a href="ProductDetail.html">
-              <img
-                src="resources/lars-blankers-B0s3Xndk6tw-unsplash.jpg"
-                class="item-image-left"
-                alt="..."
-              />
-              <!--<div
-                class="add-to-cart"
-                onclick="window.location.href='加入购物车链接';"
-              >
-                加入購物車
-              </div>-->
-            </a>
-            <a href="ProductDetail.html">
-              <p class="item-caption">有機馬鈴薯<br />NT$100</p>
-            </a>
-          </div>
-          <div id="egg3">
-            <a href="ProductDetail.html">
-              <img
-                src="resources/lars-blankers-B0s3Xndk6tw-unsplash.jpg"
-                class="item-image-left"
-                alt="..."
-              />
-              <!--<div
-                class="add-to-cart"
-                onclick="window.location.href='加入购物车链接';"
-              >
-                加入購物車
-              </div>-->
-            </a>
-            <a href="ProductDetail.html">
-              <p class="item-caption">有機馬鈴薯<br />NT$100</p>
-            </a>
-          </div>
-          <div id="egg4">
-            <a href="ProductDetail.html">
-              <img
-                src="resources/lars-blankers-B0s3Xndk6tw-unsplash.jpg"
-                class="item-image-left"
-                alt="..."
-              />
-              <!--<div
-                class="add-to-cart"
-                onclick="window.location.href='加入购物车链接';"
-              >
-                加入購物車
-              </div>-->
-            </a>
-            <a href="ProductDetail.html">
-              <p class="item-caption">有機馬鈴薯<br />NT$100</p>
-            </a>
-          </div>
-        </div>
-        <div class="item-container" id="merch">
-          <div id="merch1">
-            <a href="ProductDetail.html">
-              <img
-                src="resources/lars-blankers-B0s3Xndk6tw-unsplash.jpg"
-                class="item-image-left"
-                alt="..."
-              />
-              <!--
-              <div
-                class="add-to-cart"
-                onclick="window.location.href='加入购物车链接';"
-              >
-                加入購物車
-              </div>-->
-            </a>
-            <a href="ProductDetail.html">
-              <p class="item-caption">有機馬鈴薯<br />NT$100</p>
-            </a>
-          </div>
-          <div id="merch2">
-            <a href="ProductDetail.html">
-              <img
-                src="resources/lars-blankers-B0s3Xndk6tw-unsplash.jpg"
-                class="item-image-left"
-                alt="..."
-              />
-              <!--<div
-                class="add-to-cart"
-                onclick="window.location.href='加入购物车链接';"
-              >
-                加入購物車
-              </div>-->
-            </a>
-            <a href="ProductDetail.html">
-              <p class="item-caption">有機馬鈴薯<br />NT$100</p>
-            </a>
-          </div>
-          <div id="merch3">
-            <a href="ProductDetail.html">
-              <img
-                src="resources/lars-blankers-B0s3Xndk6tw-unsplash.jpg"
-                class="item-image-left"
-                alt="..."
-              />
-              <!--
-              <div
-                class="add-to-cart"
-                onclick="window.location.href='加入购物车链接';"
-              >
-                加入購物車
-              </div>-->
-            </a>
-            <a href="ProductDetail.html">
-              <p class="item-caption">有機馬鈴薯<br />NT$100</p>
-            </a>
-          </div>
-          <div id="merch4">
-            <a href="ProductDetail.html">
-              <img
-                src="resources/lars-blankers-B0s3Xndk6tw-unsplash.jpg"
-                class="item-image-left"
-                alt="..."
-              />
-              <!--
-              <div
-                class="add-to-cart"
-                onclick="window.location.href='加入购物车链接';"
-              >
-                加入購物車
-              </div>!-->
-            </a>
-            <a href="ProductDetail.html">
-              <p class="item-caption">有機馬鈴薯<br />NT$100</p>
-            </a>
-          </div>
+          <!-- 動態生成雞蛋商品 -->
         </div>
       </div>
     </div>
@@ -544,7 +325,7 @@
             class="d-flex align-items-center mb-3 link-body-emphasis text-decoration-none"
           >
             <img
-              src="resources/專題提案_第1組__1_-removebg-preview.png"
+              src="static/resources/專題提案_第1組__1_-removebg-preview.png"
               alt="Logo"
               width="100"
               height="100"
@@ -593,6 +374,63 @@
       </footer>
     </div>
     <!--JS Start-->
-    <script src="static/MissGreen.js"></script>
+    <script>
+      // 從 Flask 傳遞的商品數據
+       const products = {{ products | tojson }};
+
+      // 定義函數用於動態生成商品項目
+      function generateProductItem(product) {
+        return `
+          <div>
+            <a href="/ProductDetail?product_id=${product.id}">
+              <img src="${product.image_url}" class="item-image-left" alt="${product.name}">
+            </a>
+            <a href="/ProductDetail?product_id=${product.id}">
+              <p class="item-caption">${product.name}<br />NT$${product.price}</p>
+            </a>
+          </div>
+        `;
+      }
+
+      // 將商品數據動態生成並填充到相應容器中
+      function fillProductContainer(products, containerId) {
+          const container = document.getElementById(containerId);
+          if (!container) {
+              console.error(`Container with id ${containerId} not found.`);
+              return;
+          }
+
+          // 清空容器內容
+          container.innerHTML = '';
+
+          // 生成並填充商品項目
+          products.forEach((product, index) => {
+            const itemId = `${containerId}${index + 1}`;
+            const itemHtml = generateProductItem(product);
+            container.innerHTML += `<div id="${itemId}">${itemHtml}</div>`;
+          });
+      }
+
+      // 根據商品數據填充到相應容器中
+      fillProductContainer(products.filter(product => product.category === '蔬菜'), 'veg');
+      fillProductContainer(products.filter(product => product.category === '水果'), 'fruits');
+      fillProductContainer(products.filter(product => product.category === '蛋類'), 'eggs');
+
+            document.addEventListener("DOMContentLoaded", function () {
+                  // 獲取購物車內容容器
+              const cartContent = document.getElementById("cartContent");
+
+                  // 獲取購物車圖標
+              const cartIcon = document.querySelector(".bi-cart");
+
+                  // 添加點擊事件監聽器
+                  /*cartIcon.addEventListener("click", function () {
+                    // 切換購物車內容容器的顯示狀態
+                    cartContent.classList.toggle("visible");
+                  });*/
+              const memberButton = document.querySelector(".bi-person");
+              console.log("jfjefofjroi"); // 打印选择到的元素
+            });
+    </script>
   </body>
 </html>
