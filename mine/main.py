@@ -159,13 +159,6 @@ def signup():
             error_message = str(e)
     return render_template('Signup.html',form=form, error_message=error_message)
 
-# 會員頁面
-@app.route('/member')
-def showMember():
-    user_id = current_user.get_id()
-    member = User.query.get(user_id)  # 從資料庫中獲取該會員的資訊
-    return render_template('Member.html', name=member.username, phone=member.phone, email=member.email)
-
 # 商品
 @app.route('/Items')
 def showProducts():
@@ -437,10 +430,24 @@ def activitiesRegistration():
         }), 200
     
     elif request.method == 'GET':
-        activities = Activity.query.all()
+        # 取得當前日期和時間
+        current_time = datetime.now()
+        activities = Activity.query.filter(Activity.event_date > current_time).all()
+        activities_dict = [activity_to_dict(activity) for activity in activities]
         form = ActivitiesRegistrationForm()
         # 如果有錯誤，返回報名表單頁面並顯示錯誤信息
-        return render_template("ActivitiesRegistration.html", form=form, activities=activities)
+        return render_template("ActivitiesRegistration.html", form=form, activities=activities_dict)
+
+#將products轉為字典
+def activity_to_dict(activity):
+    return {
+        'id': activity.id,
+        'name': activity.name,
+        'description': activity.description,
+        'fee': activity.fee,
+        'image_url': activity.image_url,
+        'location': activity.location,
+    }
 
 @app.errorhandler(404)
 def page_not_found(e):
