@@ -22,7 +22,7 @@
       rel="stylesheet"
     />
     <style>
-a {
+      a {
         text-decoration: none;
         text-align: center;
         color: #000000;
@@ -102,7 +102,6 @@ a {
         font-size: xx-large;
         font-family: "Sacramento", cursive;
       }
-
     </style>
   </head>
   <body>
@@ -345,22 +344,26 @@ a {
       alt="..."
     />
     <!--顯示商品-->
-    {% for product in latest_products %}
-    {% if loop.index % 4 == 1 %}
-        <div class="item-container">
-    {% endif %}
-    <div>
+    {% for product in latest_products %} {% if loop.index % 4 == 1 %}
+    <div class="item-container">
+      {% endif %}
+      <div>
         <a href="/ProductDetail?product_id={{product.id}}">
-            <img src="{{ product.image_url }}" class="item-image-left" alt="{{product.name}}">
+          <img
+            src="{{ product.image_url }}"
+            class="item-image-left"
+            alt="{{product.name}}"
+          />
         </a>
         <a href="/ProductDetail?product_id=${product.id}">
-            <p class="item-caption">{{ product.name }}<br />NT${{ product.price }}</p>
+          <p class="item-caption">
+            {{ product.name }}<br />NT${{ product.price }}
+          </p>
         </a>
+      </div>
+      {% if loop.index % 4 == 0 or loop.last %}
     </div>
-    {% if loop.index % 4 == 0 or loop.last %}
-        </div>
-    {% endif %}
-    {% endfor %}
+    {% endif %} {% endfor %}
 
     <iframe
       class="iframe-container"
@@ -383,7 +386,7 @@ a {
             class="d-flex align-items-center mb-3 link-body-emphasis text-decoration-none"
           >
             <img
-              src="resources/專題提案_第1組__1_-removebg-preview.png"
+              src="static/resources/專題提案_第1組__1_-removebg-preview.png"
               alt="Logo"
               width="100"
               height="100"
@@ -436,6 +439,21 @@ a {
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
+    <script>
+      window.addEventListener("beforeunload", function () {
+        navigator.sendBeacon("/logout");
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        var popoverTriggerList = [].slice.call(
+          document.querySelectorAll('[data-bs-toggle="popover"]')
+        );
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+          return new bootstrap.Popover(popoverTriggerEl, {
+            html: true, // Enable HTML content in the popover
+          });
+        });
+      });
+    </script>
   </body>
 </html>
 <!--Updated:
