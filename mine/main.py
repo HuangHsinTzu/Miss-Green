@@ -159,13 +159,6 @@ def signup():
             error_message = str(e)
     return render_template('Signup.html',form=form, error_message=error_message)
 
-# 會員頁面
-@app.route('/member')
-def showMember():
-    user_id = current_user.get_id()
-    member = User.query.get(user_id)  # 從資料庫中獲取該會員的資訊
-    return render_template('Member.html', name=member.username, phone=member.phone, email=member.email)
-
 # 商品
 @app.route('/Items')
 def showProducts():
