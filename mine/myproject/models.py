@@ -1,4 +1,3 @@
-#from myproject import db, login_manager
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -27,7 +26,7 @@ class User(UserMixin, db.Model):
     # user和活動成員關聯
     Activities_reg_rec = db.relationship('Activities_reg_rec', backref='user', uselist=False)
 
-    
+
     def __init__(self, email, username, password, phone):
         """初始化"""
         self.email = email
@@ -56,6 +55,7 @@ class Farmer(UserMixin, db.Model):
     phone = db.Column(db.String(32))
 
     products = db.relationship('Product', backref='farmer', lazy='dynamic')
+    activities = db.relationship('Activity', backref='farmer', lazy='dynamic')
 
     def __init__(self, email, username, password, phone):
         self.username = username
@@ -71,7 +71,6 @@ class Farmer(UserMixin, db.Model):
         new_product = Product(name=name, description=description, price=price, category=category, quantity=quantity, image_url=image_url, farmer_id=self.id)
         db.session.add(new_product)
         
-
         return new_product
 
     def remove_product(self, product_id):
@@ -80,6 +79,12 @@ class Farmer(UserMixin, db.Model):
             db.session.delete(product)
             db.session.commit()
 
+    def add_activity(self, image_url, name, event_date, location, fee, description, capacity):
+        new_activity = Activity(image_url=image_url, name=name, event_date=event_date, location=location, fee=fee, description=description, capacity = capacity, farmer_id=self.id)
+        db.session.add(new_activity)
+
+        return new_activity
+        
     def get_orders(self):
         return Order.query.join(Product).filter(Product.farmer_id == self.id).all()
 
@@ -187,16 +192,6 @@ class Order(db.Model):
         self.product_id = product_id
         self.quantity = quantity
 
-#活動報名
-class Activities_reg_rec(UserMixin, db.Model):
-    __tablename__ = 'activities_reg_rec'
-    id = db.Column(db.Integer, primary_key = True)
-    activities_member_name = db.Column(db.String(32), nullable = False)
-    activities_member_phone = db.Column(db.String(32), nullable = False)
-    activities_member_email = db.Column(db.String(32), nullable = False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    activity_id = db.Column(db.Integer, db.ForeignKey('activities.id'))
-
 #活動
 class Activity(db.Model):
     __tablename__ = 'activities'
@@ -222,3 +217,14 @@ class Activity(db.Model):
         self.capacity = capacity
         self.farmer_id = farmer_id
 
+#活動報名
+class Activities_reg_rec(UserMixin, db.Model):
+    __tablename__ = 'activities_reg_rec'
+    id = db.Column(db.Integer, primary_key = True)
+    activities_member_name = db.Column(db.String(32), nullable = False)
+    activities_member_phone = db.Column(db.String(32), nullable = False)
+    activities_member_email = db.Column(db.String(32), nullable = False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    activity_id = db.Column(db.Integer, db.ForeignKey('activities.id'))
+
+    #user = db.relationship('User', backref='Activities_reg_rec', uselist=False)
