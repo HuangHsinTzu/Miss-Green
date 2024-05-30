@@ -439,21 +439,6 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
-    <script>
-      window.addEventListener("beforeunload", function () {
-        navigator.sendBeacon("/logout");
-      });
-      document.addEventListener("DOMContentLoaded", function () {
-        var popoverTriggerList = [].slice.call(
-          document.querySelectorAll('[data-bs-toggle="popover"]')
-        );
-        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-          return new bootstrap.Popover(popoverTriggerEl, {
-            html: true, // Enable HTML content in the popover
-          });
-        });
-      });
-    </script>
   </body>
 </html>
 <!--Updated:
