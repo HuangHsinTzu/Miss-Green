@@ -275,8 +275,8 @@
               <p id="error-message" style="color:#143032">{{ error_message }}</p>
               <input type="text1" id="input-name" name="username" pattern="[a-zA-Z]+" title="只能使用英文字母~" placeholder="帳號名稱" required />
               <input type="email" id="input-email" name="email" placeholder="電子信箱" title="請輸入有效電子信箱~" required/>
-              <input type="password" id="input-pwd" name="password" pattern=".{8,}" title="請輸入至少8位數~" placeholder="密碼" required/>
-              <input type="password" id="input-pwd2" name="pass_confirm" pattern=".{8,}" placeholder="確認密碼"required oninput="setCustomValidity('');" onchange="if(document.getElementById('input-pwd').value != document.getElementById('input-pwd2').value){setCustomValidity('密碼不吻合');}"/>
+              <input type="text1" id="input-pwd" name="password" pattern=".{8,}" title="請輸入至少8位數~" placeholder="密碼" required/>
+              <input type="text1" id="input-pwd2" name="pass_confirm" pattern=".{8,}" placeholder="確認密碼"required oninput="setCustomValidity('');" onchange="if(document.getElementById('input-pwd').value != document.getElementById('input-pwd2').value){setCustomValidity('密碼不吻合');}"/>
               <input type="tel" id="input-phone" name="phone" pattern="[0-9]{10}" placeholder="手機號碼" title="請輸入有效手機號碼~" required/>
               <div class="checkbox">
                 <label>
