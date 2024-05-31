@@ -412,9 +412,16 @@
   </div>
     <div class="activitiesList" style="margin: 30px; margin-left: 100px;">
       <h5>您的活動：</h5>
-      <div id="successMessage" style="display: none;">
-          <!-- 這裡顯示成功報名的活動 -->
-      </div>
+      <ul>
+        {% for activity in user_activities %}
+            <li>{{ activity.name }} - {{ activity.event_date }}
+                <div id="countdown-{{ loop.index }}"></div>
+                <script>
+                    countdown("{{ activity.event_date }}", "countdown-{{ loop.index }}");
+                </script>
+            </li>
+        {% endfor %}
+    </ul>
   </div>
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="cardContainer">
       <!-- 顯示所有活動 -->
@@ -438,7 +445,12 @@
             ></button>
           </div>
           <div class="modal-body">
-            <div class="description">砍竹子好快樂 喔耶</div>
+            <h5 id="modalActivityName"></h5>
+            <p>日期: <span id="modalActivityDate"></span></p>
+            <p>地點: <span id="modalActivityLocation"></span></p>
+            <p>費用: <span id="modalActivityFee"></span></p>
+            <input type="hidden" id="selectedActivityId" value="">
+            <p>  <span id="modalActivityDescription"></span></p>
             <form id="activityForm" method="POST" action={{ url_for('activitiesRegistration') }}>
               {{ form.hidden_tag() }}
               <p id="error-message" style="color:#143032">{{ error_message }}</p>
@@ -484,20 +496,24 @@
     <script>
         window.onload = function() {
             const activities = {{ activities | tojson }};
-            
-            console.log(activities);
+            function countdown(eventDate, elementId) {
+              const countDownDate = new Date(eventDate).getTime();
 
-            // 函數用於將活動信息顯示在頁面上
-            /*function displayRegisteredActivities(activities) {
-                const activitiesList = document.getElementById('activitiesList');
-                activities.forEach(activity => {
-                    const listItem = document.createElement('li');
-                    listItem.innerHTML = `<b>姓名：</b> ${activity.name}, <b>電話：</b> ${activity.phone}, <b>郵箱：</b> ${activity.email}`;
-                    activitiesList.appendChild(listItem);
-                });
-            }*/
+              const x = setInterval(function() {
+                  const now = new Date().getTime();
+                  const distance = countDownDate - now;
 
-            // 函數用於將活動信息顯示在卡片中
+                  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+                  document.getElementById(elementId).innerHTML = days + "d " + hours + "h ";
+
+                  if (distance < 0) {
+                      clearInterval(x);
+                      document.getElementById(elementId).innerHTML = "EXPIRED";
+                  }
+              }, 1000);
+            }
             function displayActivities(activities) {
                 const cardContainer = document.getElementById('cardContainer');
                 console.log(activities);
@@ -512,7 +528,7 @@
                         <div class="card-body">
                             <h5 class="card-title">${activity.name}</h5>
                             <p class="card-text">${activity.event_date}</p>
-                            <a href="#" class="btn register-btn" data-bs-toggle="modal" data-bs-target="#editModal">報名活動</a>
+                            <a href="#" class="btn register-btn" data-bs-toggle="modal" data-bs-target="#editModal" onclick="setActivityIdAndInfo('${activity.id}', '${activity.name}', '${activity.event_date}', '${activity.location}', '${activity.fee}', '${activity.description}')">報名活動</a>
                         </div>
                     `;
                     cardContainer.appendChild(card);
@@ -523,6 +539,17 @@
             displayActivities(activities);
         }
 
+        function setActivityId(activityId) {
+            document.getElementById('selectedActivityId').value = activityId;
+        }
+        function setActivityIdAndInfo(activityId, name, date, location, fee, description) {
+            document.getElementById('selectedActivityId').value = activityId;
+            document.getElementById('modalActivityName').textContent = name;
+            document.getElementById('modalActivityDate').textContent = date;
+            document.getElementById('modalActivityLocation').textContent = location;
+            document.getElementById('modalActivityFee').textContent = fee;
+            document.getElementById('modalActivityDescription').textContent = description;
+        }
 
         // 在全局作用域中定义 saveActivity 函数
         function saveActivity() {
@@ -530,6 +557,9 @@
             var name = document.getElementById("name").value;
             var phone = document.getElementById("phone").value;
             var email = document.getElementById("email").value;
+            // 获取报名活动按钮
+            const registerButton = document.getElementById('activities_id');
+            var activity_id = document.getElementById('selectedActivityId').value;
 
             // 表单验证
             if (!name || !phone || !email) {
@@ -537,7 +567,7 @@
                 return;
             }
             // 你的处理逻辑
-            console.log("儲存資料到資料庫", { name, phone, email });
+            console.log("儲存資料到資料庫", { name, phone, email, activity_id });
 
             // 清理 backdrop
             document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
@@ -546,6 +576,7 @@
             formdata.append("name", name);
             formdata.append("phone", phone);
             formdata.append("email", email);
+            formdata.append("activity_id", activity_id); 
 
             fetch("/ActivitiesRegistration",{
               method: "POST",

@@ -4,6 +4,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
 from datetime import datetime
+from sqlalchemy.orm import relationship
 
 
 db = SQLAlchemy()
@@ -38,11 +39,11 @@ class User(UserMixin, db.Model):
         """檢查使用者密碼"""
         return self.password == password 
 
-    def add_Activity_mem(self, activities_member_name, activities_member_phone, activities_member_email):
+    def add_Activity_mem(self, activities_member_name, activities_member_phone, activities_member_email, user_id, activity_id):
         """報名活動"""
-        new_ACtivity_mem = Activities_reg_rec(activities_member_name=activities_member_name, activities_member_phone=activities_member_phone, activities_member_email=activities_member_email)
+        new_ACtivity_mem = Activities_reg_rec(activities_member_name=activities_member_name, activities_member_phone=activities_member_phone, activities_member_email=activities_member_email, user_id=user_id, activity_id=activity_id)
         db.session.add(new_ACtivity_mem)
-
+        return new_ACtivity_mem
 
 #賣家
 class Farmer(UserMixin, db.Model):
@@ -226,4 +227,5 @@ class Activities_reg_rec(UserMixin, db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     activity_id = db.Column(db.Integer, db.ForeignKey('activities.id'))
 
-    #user = db.relationship('User', backref='Activities_reg_rec', uselist=False)
+    # 定義與 Activity 的關聯關係
+    activity = relationship("Activity")

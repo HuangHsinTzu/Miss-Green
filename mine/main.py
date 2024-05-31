@@ -11,7 +11,7 @@ from datetime import datetime
 
 
 
-from myproject.models import User, db, login_manager, Product, ShoppingCart, ShoppingCartItem, Record, Farmer, Order, Activity
+from myproject.models import User, db, login_manager, Product, ShoppingCart, ShoppingCartItem, Record, Farmer, Order, Activity, Activities_reg_rec
 from myproject.forms import LoginForm, RegistrationForm, UploadForm, ActivitiesRegistrationForm
 from flask_migrate import Migrate
 
@@ -469,21 +469,27 @@ def activitiesRegistration():
         name = request.form.get('name')
         phone = request.form.get('phone')
         email = request.form.get('email')
+        activity_id = request.form.get('activity_id') # 獲取 activity_id
 
-        print(f"Received data: {name}, {phone}, {email}")
+        print(f"Received data: {name}, {phone}, {email}, {activity_id}")
 
-        if not all([name, phone, email]):
+        if not all([name, phone, email, activity_id]):
             return jsonify({'error': '所有欄位都是必填項'}), 400
-        try: 
+        try:
+            user_id = current_user.id
             # 使用当前登录用户的 ID 创建 User 的实例
             user = db.session.get(User, current_user.id)
             if not user:
                 return jsonify({'error': '用戶不存在'}), 404
-            new_Activity_mem = user.add_Activity_mem(name, phone, email)
+            # 确保 activity_id 对应的活动存在
+            activity = db.session.get(Activity, activity_id)
+            if not activity:
+                return jsonify({'error': '活动不存在'}), 404
+            new_Activity_mem = user.add_Activity_mem(name, phone, email, user_id, activity_id)
             db.session.commit()
 
             # 獲取使用者成功報名的活動
-            activities = Activities_reg_rec.query.filter_by(activities_member_email=user.email).all()
+            activities_reg = Activities_reg_rec.query.filter_by(activities_member_email=user.email).all()
 
         except IntegrityError as e:
             db.session.rollback()
@@ -492,23 +498,33 @@ def activitiesRegistration():
         
                 # 将新商品信息返回给前端
         return jsonify({
-            'id': new_Activity_mem.id,
             'name': new_Activity_mem.activities_member_name,
             'phone': new_Activity_mem.activities_member_phone,
             'email': new_Activity_mem.activities_member_email,
-            'activities': [{'name': activity.activities_member_name, 'phone': activity.activities_member_phone, 'email': activity.activities_member_email} for activity in activities]
+            'activity_id': new_Activity_mem.activity_id,
+            'activities': [{'name': activity.activities_member_name, 'phone': activity.activities_member_phone, 'email': activity.activities_member_email} for activity in activities_reg]
         }), 200
     
     elif request.method == 'GET':
         # 取得當前日期和時間
         current_time = datetime.now()
+
+        # 获取当前用户的已报名活动记录，并过滤未过期的活动
+        user = db.session.get(User, current_user.id)
+        if not user:
+            return jsonify({'error': '用戶不存在'}), 404
+        
+        activities_regs = Activities_reg_rec.query.join(Activity, Activities_reg_rec.activity_id == Activity.id)\
+            .filter(Activities_reg_rec.activities_member_email == user.email, Activity.event_date > current_time).all() # 獲取會員的報名紀錄
+        activities_regs_dict = [activities_reg_to_dict(activities_reg) for activities_reg in activities_regs]
         activities = Activity.query.filter(Activity.event_date > current_time).all()
         activities_dict = [activity_to_dict(activity) for activity in activities]
+        print(activities_dict)
         form = ActivitiesRegistrationForm()
         # 如果有錯誤，返回報名表單頁面並顯示錯誤信息
-        return render_template("ActivitiesRegistration.html", form=form, activities=activities_dict)
+        return render_template("ActivitiesRegistration.html", form=form, activities=activities_dict, user_activities=activities_regs_dict)
 
-#將products轉為字典
+#將activities轉為字典
 def activity_to_dict(activity):
     return {
         'id': activity.id,
@@ -518,6 +534,13 @@ def activity_to_dict(activity):
         'fee': activity.fee,
         'image_url': activity.image_url,
         'location': activity.location,
+    }
+
+def activities_reg_to_dict(activities_reg):
+    return {
+        'id': activities_reg.activity.id,
+        'name': activities_reg.activity.name,
+        'event_date': activities_reg.activity.event_date
     }
 
 @app.errorhandler(404)
@@ -530,4 +553,3 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     app.run(debug=True)
-
