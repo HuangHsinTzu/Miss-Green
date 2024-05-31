@@ -342,10 +342,9 @@ def add_activities():
         fee = request.form['fee']
         description = request.form['description']
         image_file = request.files['image']
-        capacity = request.form['capacity']
-
+        
         # 检查数据是否有效
-        if not all([activityname, date, location, fee, description, capacity]) or not image_file:
+        if not all([activityname, date, location, fee, description]) or not image_file:
             return jsonify({'error': '所有字段都是必填项'}), 400
 
         # 將字符串日期轉換為 datetime 對象
@@ -358,7 +357,7 @@ def add_activities():
         
             try:
             # 添加商品到数据库
-                new_activity = farmer.add_activity(image_url, activityname, event_date, location, fee, description, capacity)
+                new_activity = farmer.add_activity(image_url, activityname, event_date, location, fee, description)
                 db.session.commit()
             except IntegrityError as e:
                 db.session.rollback()
@@ -370,15 +369,86 @@ def add_activities():
             'description': new_activity.description,
             'fee': new_activity.fee,
             'location': new_activity.location,
-            'date': new_activity.event_date.strftime('%Y/%m/%d'),
+            'event_date': new_activity.event_date.strftime('%Y/%m/%d'),
             'image_url': new_activity.image_url,
-            'capacity':new_activity.capacity
         }), 200
 
     else:    
         # 獲取該農夫上架的所有商品
         farmer_activities = farmer.activities.all()
         return render_template('AddActivities.html', farmer_activities=farmer_activities)
+
+#農夫編輯活動取得原始資料
+@app.route('/GetActivityDetail', methods=['GET'])
+def get_activity_detail():
+    activity_id = request.args.get('id')
+    if not activity_id:
+        return jsonify({'error': '活動ID缺失'}), 400
+
+    activity = Activity.query.get(activity_id)
+    if not activity:
+        return jsonify({'error': '活動未找到'}), 404
+
+    activity_data = {
+        'id': activity.id,
+        'name': activity.name,
+        'event_date': activity.event_date.strftime('%Y/%m/%d'),
+        'location': activity.location,
+        'fee': activity.fee,
+        'description': activity.description,
+        'image_url': activity.image_url
+    }
+    return jsonify(activity_data)
+
+#農夫編輯活動後更新
+@app.route('/UpdateActivity', methods=['POST'])
+def update_activity():
+    activity_id = request.form.get('id')
+    if not activity_id:
+        return jsonify({'error': '活動ID缺失'}), 400
+
+    activity = Activity.query.get(activity_id)
+    if not activity:
+        return jsonify({'error': '活動未找到'}), 404
+
+    activity.name = request.form.get('name', activity.name)
+    # 將字符串日期轉換為 datetime 對象
+    date_str = request.form.get('event_date', None)
+    if date_str:
+        try:
+            event_date = datetime.strptime(date_str, '%Y-%m-%d')
+            activity.event_date = event_date
+        except ValueError:
+            return jsonify({'error': '無效的日期格式，應為YYYY-MM-DD'}), 400
+    else:
+        activity.event_date = activity.event_date
+    activity.location = request.form.get('location', activity.location)
+    activity.fee = request.form.get('fee', activity.fee)
+    activity.description = request.form.get('description', activity.description)
+
+    if image_file:
+        filename = secure_filename(image_file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        image_file.save(file_path)
+        activity.image_url = url_for('uploaded_file', filename=filename, _external=True)
+
+    db.session.commit()
+    return jsonify({'success': True})
+
+#農夫刪除活動
+@app.route('/DeleteActivity', methods=['POST'])
+def delete_activity():
+    activity_id = request.form.get('id')
+    if not activity_id:
+        return jsonify({'error': '活動ID缺失'}), 400
+
+    activity = Activity.query.get(activity_id)
+    if not activity:
+        return jsonify({'error': '活動未找到'}), 404
+
+    db.session.delete(activity)
+    db.session.commit()
+    return jsonify({'success': True})
 
 #呈現活動報名狀況詳細資料
 @app.route('/ActivityDetail', methods=['GET'])
