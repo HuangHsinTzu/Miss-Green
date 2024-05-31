@@ -423,7 +423,7 @@
               <input
                 type="text"
                 class="form-control"
-                id="editDiscription"
+                id="editDescription"
                 placeholder="請輸入活動描述"
               />
             </form>
@@ -436,7 +436,12 @@
             >
               取消
             </button>
-            <button type="button" class="btn btn-primary" id="saveButton">
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="saveButton"
+              onclick="saveEditActivity();"
+            >
               完成
             </button>
           </div>
@@ -463,7 +468,12 @@
                 {{ activity.event_date.strftime('%Y/%m/%d') }}
               </p>
               <div class="mt-auto d-flex justify-content-between">
-                <a href="#" class="btn btn-primary edit-btn">編輯</a>
+                <a
+                  href="#"
+                  class="btn btn-primary edit-btn"
+                  onclick="editActivity('{{ activity.id }}');"
+                  >編輯</a
+                >
                 <a
                   href="#"
                   class="btn btn-danger delete-btn"
@@ -525,83 +535,94 @@
     </div>
     <script>
       var currentEditId = null;
-      // 获取所有编辑按钮
-      var editButtons = document.querySelectorAll(".edit-btn");
 
-      // 为每个编辑按钮添加点击事件监听器
-      editButtons.forEach(function (button) {
-        button.addEventListener("click", function () {
-          // 获取当前编辑的活动ID
-          currentEditId = this.getAttribute("data-id");
+      function formatDate(date) {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        const day = date.getDate().toString().padStart(2, "0");
+        return `${year}/${month}/${day}`;
+      }
 
-          // 获取活动的详细信息并填充到编辑模态框中
-          fetch(`/GetActivityDetail?id=${currentEditId}`)
-            .then((response) => response.json())
-            .then((data) => {
-              document.getElementById("editName").value = data.name;
-              document.getElementById("editDate").value = data.event_date;
-              document.getElementById("editLocation").value = data.location;
-              document.getElementById("editFee").value = data.fee;
-              document.getElementById("editDescription").value =
-                data.description;
-              document.getElementById("editImage").value = data.image_url;
-              // 显示编辑模态框
-              var modal = new bootstrap.Modal(
-                document.getElementById("editModal")
-              );
-              modal.show();
-            })
-            .catch((error) => console.error("Error:", error));
-        });
-      });
+      function editActivity(id) {
+        // 获取当前编辑的活动ID
+        currentEditId = id;
+        console.log(currentEditId);
+        // 获取活动的详细信息并填充到编辑模态框中
+        fetch(`/GetActivityDetail?id=${currentEditId}`)
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("editName").value = data.name;
+            document.getElementById("editDate").value = formatDate(
+              new Date(data.event_date)
+            );
+            document.getElementById("editLocation").value = data.location;
+            document.getElementById("editFee").value = data.fee;
+            document.getElementById("editDescription").value = data.description;
+            // 將 image_url 賦值給 input type="file" 元素
+            const imageUrl = data.image_url;
+            console.log(imageUrl);
+            const file = new File([imageUrl], data.name, {
+              type: "image/jpeg",
+            }); // 創建 File 物件
+            const fileInput = document.getElementById("editImage");
+            const fileList = new DataTransfer(); // 創建 DataTransfer 物件
+            fileList.items.add(file); // 將 File 物件添加到 DataTransfer 中
+            fileInput.files = fileList.files;
+
+            // 显示编辑模态框
+            var modal = new bootstrap.Modal(
+              document.getElementById("editModal")
+            );
+            modal.show();
+          })
+          .catch((error) => console.error("Error:", error));
+      }
 
       // 监听保存按钮点击事件
-      document
-        .getElementById("saveEditButton")
-        .addEventListener("click", function () {
-          var name = document.getElementById("editName").value;
-          var date = document.getElementById("editDate").value;
-          var location = document.getElementById("editLocation").value;
-          var fee = document.getElementById("editFee").value;
-          var description = document.getElementById("editDescription").value;
-          var imageInput = document.getElementById("editImage");
+      function saveEditActivity() {
+        var name = document.getElementById("editName").value;
+        var date = document.getElementById("editDate").value;
+        var location = document.getElementById("editLocation").value;
+        var fee = document.getElementById("editFee").value;
+        var description = document.getElementById("editDescription").value;
+        var imageInput = document.getElementById("editImage");
 
-          if (!isNumeric(fee)) {
-            alert("報名費用必須是有效的數字！");
-            return;
-          }
+        if (!isNumeric(fee)) {
+          alert("報名費用必須是有效的數字！");
+          return;
+        }
 
-          //获取上传的图片文件
-          var file = imageInput.files[0];
+        //获取上传的图片文件
+        var file = imageInput.files[0];
 
-          var formData = new FormData();
-          formData.append("id", currentEditId);
-          formData.append("image", file);
-          formData.append("activitiyname", name);
-          formData.append("event_date", date);
-          formData.append("location", location);
-          formData.append("fee", fee);
-          formData.append("description", description);
+        var formData = new FormData();
+        formData.append("id", currentEditId);
+        formData.append("image", file);
+        formData.append("activitiyname", name);
+        formData.append("event_date", date);
+        formData.append("location", location);
+        formData.append("fee", fee);
+        formData.append("description", description);
 
-          if (!imageInput.files || !imageInput.files[0]) {
-            alert("請上傳活動照片");
-            return;
-          }
+        if (!imageInput.files || !imageInput.files[0]) {
+          alert("請上傳活動照片");
+          return;
+        }
 
-          fetch(`/UpdateActivity`, {
-            method: "POST",
-            body: formData,
+        fetch(`/UpdateActivity`, {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              location.reload(); // 刷新页面以反映更改
+            } else {
+              alert("更新活動失敗！");
+            }
           })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.success) {
-                location.reload(); // 刷新页面以反映更改
-              } else {
-                alert("更新活動失敗！");
-              }
-            })
-            .catch((error) => console.error("Error:", error));
-        });
+          .catch((error) => console.error("Error:", error));
+      }
 
       function isNumeric(value) {
         // 使用正则表达式验证值是否为有效的数字（可以包括小数点）
@@ -727,7 +748,7 @@
                             <h5 class="card-title">${data.name}</h5>
                             <p class="card-text">${data.event_date}</p>
                             <div class="mt-auto d-flex justify-content-between">
-                                <a href="#" class="btn btn-primary edit-btn  data-id="${data.id}">編輯</a>
+                                <a href="#" class="btn btn-primary edit-btn" onclick ="editActivity(${data.id});">編輯</a>
                                 <a href="#" class="btn btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#Confirm-Modal">刪除</a>
                             </div>
                         </div>
