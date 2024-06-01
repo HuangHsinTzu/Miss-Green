@@ -529,7 +529,7 @@ def activitiesRegistration():
         activities_regs_dict = [activities_reg_to_dict(activities_reg) for activities_reg in activities_regs]
         activities = Activity.query.filter(Activity.event_date > current_time).all()
         activities_dict = [activity_to_dict(activity) for activity in activities]
-        print(activities_dict)
+        #print(activities_dict)
         form = ActivitiesRegistrationForm()
         # 如果有錯誤，返回報名表單頁面並顯示錯誤信息
         return render_template("ActivitiesRegistration.html", form=form, activities=activities_dict, user_activities=activities_regs_dict)
@@ -553,6 +553,25 @@ def activities_reg_to_dict(activities_reg):
         'event_date': activities_reg.activity.event_date
     }
 
+# 取消報名
+@app.route('/CancelRegistration', methods=['POST'])
+def cancel_registration():
+    try:
+        data = request.get_json()
+        activity_id = data.get('activity_id')
+        user_id = current_user.id
+        # Find the registration entry
+        registration = Activities_reg_rec.query.filter_by(user_id=user_id, activity_id=activity_id).first()
+
+        if registration:
+            db.session.delete(registration)
+            db.session.commit()
+            return jsonify({"message": "Registration cancelled successfully."}), 200
+        else:
+            return jsonify({"message": "Registration not found."}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('error.html', message="Page not found: 404"), 404

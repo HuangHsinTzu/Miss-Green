@@ -412,16 +412,77 @@
   </div>
     <div class="activitiesList" style="margin: 30px; margin-left: 100px;">
       <h5>您的活動：</h5>
-      <ul>
-        {% for activity in user_activities %}
-            <li>{{ activity.name }} - {{ activity.event_date }}
-                <div id="countdown-{{ loop.index }}"></div>
+      <table class="registeredTable">
+        <thead>
+            <tr>
+                <th class="activity-name">活動名稱</th>
+                <th class="event-date">活動日期</th>
+                <th class="countdown">距離活動剩下</th>
+                <th class="cancel-register-button"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for activity in user_activities %}
+            <tr data-id="{{ activity.id }}">
+                <td>{{ activity.name }}</td>
+                <td>{{ activity.event_date }}</td>
+                <td><div id="countdown-{{ loop.index }}"></div></td>
+                <td><button data-id="{{ activity.id }}" class="cancelBtn" data-bs-toggle="modal" data-bs-target="#Confirm-Modal">取消報名</button></td>
                 <script>
                     countdown("{{ activity.event_date }}", "countdown-{{ loop.index }}");
                 </script>
-            </li>
-        {% endfor %}
-    </ul>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!-- Modal -->
+    <div
+    class="modal fade"
+    id="Confirm-Modal"
+    tabindex="-1"
+    aria-labelledby="Confirm-ModaLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1
+            class="modal-title fs-5"
+            id="Confirm-ModaLabel"
+            style="font-weight: 700"
+          >
+            確定要取消報名該活動嗎?
+          </h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            onclick="cancelCancel();"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-danger"
+            id="confirmDeleteButton"
+            onclick="cancelRegistration();"
+          >
+            確定
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="cancelCancel();"
+            data-bs-dismiss="modal"
+          >
+            返回
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+    
   </div>
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="cardContainer">
       <!-- 顯示所有活動 -->
@@ -493,117 +554,151 @@
         </div>
       </div>
     </div>
-    <script> 
-        window.onload = function() {
-            const activities = {{ activities | tojson }};
-            function countdown(eventDate, elementId) {
+    <script>
+      var currentId = null;
+      window.onload = function() {
+          const activities = {{ activities | tojson }};
+          
+          function countdown(eventDate, elementId) {
               const countDownDate = new Date(eventDate).getTime();
-
               const x = setInterval(function() {
                   const now = new Date().getTime();
                   const distance = countDownDate - now;
-
                   const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                   const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
                   document.getElementById(elementId).innerHTML = days + "d " + hours + "h ";
-
                   if (distance < 0) {
                       clearInterval(x);
                       document.getElementById(elementId).innerHTML = "EXPIRED";
                   }
               }, 1000);
-            }
-            function displayActivities(activities) {
-                const cardContainer = document.getElementById('cardContainer');
-                console.log(activities);
-                activities.forEach(activity => {
-                    const card = document.createElement('div');
-                    card.classList.add('card', 'col');
-                    card.style.width = '18rem';
-                    card.innerHTML = `
-                        <div class="card-img-container">
-                            <img src="${activity.image_url}" class="card-img-top" alt="${activity.name}" />
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">${activity.name}</h5>
-                            <p class="card-text">${activity.event_date}</p>
-                            <a href="#" class="btn register-btn" data-bs-toggle="modal" data-bs-target="#editModal" onclick="setActivityIdAndInfo('${activity.id}', '${activity.name}', '${activity.event_date}', '${activity.location}', '${activity.fee}', '${activity.description}')">報名活動</a>
-                        </div>
-                    `;
-                    cardContainer.appendChild(card);
-                });
-            }
-
-            //displayRegisteredActivities(activities);
-            displayActivities(activities);
-        }
-
-        function setActivityId(activityId) {
-            document.getElementById('selectedActivityId').value = activityId;
-        }
-        function setActivityIdAndInfo(activityId, name, date, location, fee, description) {
-            document.getElementById('selectedActivityId').value = activityId;
-            document.getElementById('modalActivityName').textContent = name;
-            document.getElementById('modalActivityDate').textContent = date;
-            document.getElementById('modalActivityLocation').textContent = location;
-            document.getElementById('modalActivityFee').textContent = fee;
-            document.getElementById('modalActivityDescription').textContent = description;
-        }
-        // 在全局作用域中定义 saveActivity 函数
-        function saveActivity() {
-            // 取得表单数据
-            var name = document.getElementById("name").value;
-            var phone = document.getElementById("phone").value;
-            var email = document.getElementById("email").value;
-            // 获取报名活动按钮
-            const registerButton = document.getElementById('activities_id');
-            var activity_id = document.getElementById('selectedActivityId').value;
-
-            // 表单验证
-            if (!name || !phone || !email) {
-                alert("请填写所有必填项");
-                return;
-            }
-            // 你的处理逻辑
-            console.log("儲存資料到資料庫", { name, phone, email, activity_id });
-
-            // 清理 backdrop
-            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-
-            var formdata = new FormData();
-            formdata.append("name", name);
-            formdata.append("phone", phone);
-            formdata.append("email", email);
-            formdata.append("activity_id", activity_id); 
-
-            fetch("/ActivitiesRegistration",{
+          }
+  
+          function displayActivities(activities) {
+              const cardContainer = document.getElementById('cardContainer');
+              console.log(activities);
+              activities.forEach(activity => {
+                  const card = document.createElement('div');
+                  card.classList.add('card', 'col');
+                  card.style.width = '18rem';
+                  card.innerHTML = `
+                      <div class="card-img-container">
+                          <img src="${activity.image_url}" class="card-img-top" alt="${activity.name}" />
+                      </div>
+                      <div class="card-body">
+                          <h5 class="card-title">${activity.name}</h5>
+                          <p class="card-text">${activity.event_date}</p>
+                          <a href="#" class="btn register-btn" data-bs-toggle="modal" data-bs-target="#editModal" onclick="setActivityIdAndInfo('${activity.id}', '${activity.name}', '${activity.event_date}', '${activity.location}', '${activity.fee}', '${activity.description}')">報名活動</a>
+                      </div>
+                  `;
+                  cardContainer.appendChild(card);
+              });
+          }
+  
+          displayActivities(activities);
+  
+          document.querySelectorAll(".cancelBtn").forEach((button) => {
+              button.addEventListener("click", function () {
+                  currentId = this.getAttribute("data-id");
+                  console.log(currentId);
+              });
+          });
+      }
+  
+      function setActivityId(activityId) {
+          document.getElementById('selectedActivityId').value = activityId;
+      }
+  
+      function setActivityIdAndInfo(activityId, name, date, location, fee, description) {
+          document.getElementById('selectedActivityId').value = activityId;
+          document.getElementById('modalActivityName').textContent = name;
+          document.getElementById('modalActivityDate').textContent = date;
+          document.getElementById('modalActivityLocation').textContent = location;
+          document.getElementById('modalActivityFee').textContent = fee;
+          document.getElementById('modalActivityDescription').textContent = description;
+      }
+  
+      function saveActivity() {
+          var name = document.getElementById("name").value;
+          var phone = document.getElementById("phone").value;
+          var email = document.getElementById("email").value;
+          const registerButton = document.getElementById('activities_id');
+          var activity_id = document.getElementById('selectedActivityId').value;
+  
+          if (!name || !phone || !email) {
+              alert("请填写所有必填项");
+              return;
+          }
+          console.log("儲存資料到資料庫", { name, phone, email, activity_id });
+  
+          document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+  
+          var formdata = new FormData();
+          formdata.append("name", name);
+          formdata.append("phone", phone);
+          formdata.append("email", email);
+          formdata.append("activity_id", activity_id); 
+  
+          fetch("/ActivitiesRegistration", {
               method: "POST",
               body: formdata
-            })
-              .then((response) => {
-                if(response.ok){
+          })
+          .then((response) => {
+              if (response.ok) {
                   return response.json();
-                }else{
+              } else {
                   throw new Error("報名活動失敗");
-                }
-              })
-              .then((data) => {
-                console.log("成功提交:", data);
-                alert("報名成功")
-                // 清空表单字段
-                document.getElementById("activityForm").reset();
-              })
-              .catch((error) => {
-                console.error("Error:", error);
-                alert("報名活動失敗");
-              });
-            // 关闭模态框
-            const modal = document.getElementById("editModal");
-            const modalInstance = bootstrap.Modal.getInstance(modal);
-            modalInstance.hide();
-        }
-    </script>
+              }
+          })
+          .then((data) => {
+              console.log("成功提交:", data);
+              alert("報名成功")
+              document.getElementById("activityForm").reset();
+          })
+          .catch((error) => {
+              console.error("Error:", error);
+              alert("報名活動失敗");
+          });
+  
+          const modal = document.getElementById("editModal");
+          const modalInstance = bootstrap.Modal.getInstance(modal);
+          modalInstance.hide();
+      }
+  
+      function cancelCancel() {
+          currentId = null;
+          console.log(currentId);
+      }
+  
+      function cancelRegistration() {
+          fetch('/CancelRegistration', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ activity_id: currentId }),
+          })
+          .then(response => {
+              if (response.ok) {
+                  const rowToDelete = document.querySelector(`[data-id='${currentId}']`);
+                  if (rowToDelete) {
+                      rowToDelete.remove();
+                  }
+                  const modal = document.getElementById("Confirm-Modal");
+                  const modalInstance = bootstrap.Modal.getInstance(modal);
+                  modalInstance.hide();
+                  console.log('取消報名成功');
+                  alert("已取消報名!");
+              } else {
+                  console.error('取消報名失敗');
+              }
+          })
+          .catch(error => {
+              console.error('取消報名失敗:', error);
+          });
+      }
+  </script>
+  
     <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"

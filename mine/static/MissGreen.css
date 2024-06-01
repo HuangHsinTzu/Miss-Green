@@ -134,3 +134,36 @@ footer {
 .activity_member th:nth-child(3), .activity_member td:nth-child(3) {
   width: 30%; /* 调整第三列的宽度 */
 }
+
+/*報名記錄表格*/
+.registeredTable {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.registeredTable th, td {
+  padding: 8px;
+}
+
+.registeredTable th {
+  background-color:#727d6b; /* 表头背景颜色 */
+  color: white;
+  font-weight: 600;
+}
+
+/* 自定义列宽度 */
+.activity-name {
+  width: 30%; /* 30%的宽度 */
+}
+
+.event-date {
+  width: 20%; /* 20%的宽度 */
+}
+
+.countdown {
+  width: 20%; /* 20%的宽度 */
+}
+
+.cancel-register-button {
+  width: 30%; /* 30%的宽度 */
+}
