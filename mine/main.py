@@ -411,7 +411,8 @@ def update_activity():
     if not activity:
         return jsonify({'error': '活動未找到'}), 404
 
-    activity.name = request.form.get('name', activity.name)
+    print("Received name:", request.form.get('activityname'),request.form.get('location'))
+    activity.name = request.form.get('activityname', activity.name)
     # 將字符串日期轉換為 datetime 對象
     date_str = request.form.get('event_date', None)
     if date_str:
@@ -425,6 +426,7 @@ def update_activity():
     activity.location = request.form.get('location', activity.location)
     activity.fee = request.form.get('fee', activity.fee)
     activity.description = request.form.get('description', activity.description)
+    image_file = request.form.get('image_file')
 
     if image_file:
         filename = secure_filename(image_file.filename)
