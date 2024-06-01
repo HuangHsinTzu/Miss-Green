@@ -511,6 +511,7 @@
                 type="button"
                 class="btn-close"
                 data-bs-dismiss="modal"
+                onclick="cancelDelete();"
                 aria-label="Close"
               ></button>
             </div>
@@ -526,6 +527,7 @@
               <button
                 type="button"
                 class="btn btn-secondary"
+                onclick="cancelDelete();"
                 data-bs-dismiss="modal"
               >
                 取消
@@ -537,84 +539,6 @@
     </div>
     <script>
       var currentEditId = null;
-
-      // 获取所有编辑按钮
-      var editButtons = document.querySelectorAll(".edit-btn");
-
-      // 为每个编辑按钮添加点击事件监听器
-      editButtons.forEach(function (button) {
-        button.addEventListener("click", function () {
-          // 获取当前编辑的活动ID
-          currentEditId = this.getAttribute("data-id");
-
-          // 获取活动的详细信息并填充到编辑模态框中
-          fetch(`/GetActivityDetail?id=${currentEditId}`)
-            .then((response) => response.json())
-            .then((data) => {
-              document.getElementById("editName").value = data.name;
-              document.getElementById("editDate").value = data.event_date;
-              document.getElementById("editLocation").value = data.location;
-              document.getElementById("editFee").value = data.fee;
-              document.getElementById("editDescription").value =
-                data.description;
-              document.getElementById("editImage").value = data.image_url;
-              // 显示编辑模态框
-              var modal = new bootstrap.Modal(
-                document.getElementById("editModal")
-              );
-              modal.show();
-            })
-            .catch((error) => console.error("Error:", error));
-        });
-      });
-
-      // 监听保存按钮点击事件
-      document
-        .getElementById("saveEditButton")
-        .addEventListener("click", function () {
-          var name = document.getElementById("editName").value;
-          var date = document.getElementById("editDate").value;
-          var location = document.getElementById("editLocation").value;
-          var fee = document.getElementById("editFee").value;
-          var description = document.getElementById("editDescription").value;
-          var imageInput = document.getElementById("editImage");
-
-          if (!isNumeric(fee)) {
-            alert("報名費用必須是有效的數字！");
-            return;
-          }
-
-          //获取上传的图片文件
-          var file = imageInput.files[0];
-
-          var formData = new FormData();
-          formData.append("id", currentEditId);
-          formData.append("image", file);
-          formData.append("activitiyname", name);
-          formData.append("event_date", date);
-          formData.append("location", location);
-          formData.append("fee", fee);
-          formData.append("description", description);
-
-          if (!imageInput.files || !imageInput.files[0]) {
-            alert("請上傳活動照片");
-            return;
-          }
-
-          fetch(`/UpdateActivity`, {
-            method: "POST",
-            body: formData,
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.success) {
-                location.reload(); // 刷新页面以反映更改
-              } else {
-                alert("更新活動失敗！");
-              }
-            })
-            .catch((error) => console.error("Error:", error));
-        });
 
       function formatDate(date) {
         const year = date.getFullYear();
@@ -718,8 +642,14 @@
       document.querySelectorAll(".delete-btn").forEach((button) => {
         button.addEventListener("click", function () {
           currentEditId = this.getAttribute("data-id");
+          console.log(currentEditId);
         });
       });
+
+      function cancelDelete() {
+        currentEditId = null;
+        console.log(currentEditId);
+      }
 
       // 获取模态框中的确认删除按钮
       var confirmDeleteButton = document.getElementById("confirmDeleteButton");
@@ -822,11 +752,8 @@
                                   <h5 class="card-title">${data.name}</h5>
                                   <p class="card-text">${data.event_date}</p>
                                   <div class="mt-auto d-flex justify-content-between">
-      <<<<<<< HEAD
-                                      <a href="#" class="btn btn-primary edit-btn  data-id="${data.id}">編輯</a>
-      =======
                                       <a href="#" class="btn btn-primary edit-btn" onclick ="editActivity(${data.id});">編輯</a>
-                                      <a href="#" class="btn btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#Confirm-Modal" onclick="deleteActivity(${data.id});">刪除</a>
+                                      <a href="#" class="btn btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#Confirm-Modal" data-id="${data.id}">刪除</a>
                                   </div>
                               </div>
                           </div>
