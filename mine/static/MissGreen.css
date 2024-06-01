@@ -123,7 +123,6 @@ footer {
   color: white;
   font-weight: 500;
 }
-
 .activity_member th:first-child, .activity_member td:first-child {
   width: 40%; /* 调整第一列的宽度 */
 }
