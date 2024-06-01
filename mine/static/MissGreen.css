@@ -92,3 +92,8 @@ footer {
   transform: translate(-50%, -50%); /* 使容器居中 */
   flex: 1;
 }
+.logout {
+  margin-right: 30px;
+  text-decoration: none;
+  color: black;
+}
