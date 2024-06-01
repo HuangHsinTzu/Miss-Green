@@ -346,6 +346,7 @@ def add_activities():
         fee = request.form['fee']
         description = request.form['description']
         image_file = request.files['image']
+        status = 1
         
         # 检查数据是否有效
         if not all([activityname, date, location, fee, description]) or not image_file:
@@ -452,7 +453,8 @@ def delete_activity():
     if not activity:
         return jsonify({'error': '活動未找到'}), 404
 
-    db.session.delete(activity)
+    # 将状态更新为 "0"
+    activity.status = "已取消"
     db.session.commit()
     return jsonify({'success': True})
 
@@ -463,7 +465,15 @@ def activityDetail():
     if activity_id:
         activity = Activity.query.filter_by(id =activity_id).first()
         if activity:
-            return render_template('ActivityDetail.html', activity=activity)
+            # 从 activities_reg_rec 表中检索具有特定 activity_id 的数据
+            try:
+                activity_reg_data = Activities_reg_rec.query.filter_by(activity_id=activity_id).all()
+                print(activity_reg_data)
+                return render_template('ActivityDetail.html', activity=activity, activity_reg_data=activity_reg_data)
+            except IntegrityError as e:
+                db.session.rollback()
+                print(f"Database error: {str(e)}")
+                return "An error occurred while querying the database", 500
     return "Activity not found", 404
 
 #活動報名
@@ -525,7 +535,7 @@ def activitiesRegistration():
         activities_regs_dict = [activities_reg_to_dict(activities_reg) for activities_reg in activities_regs]
         activities = Activity.query.filter(Activity.event_date > current_time).all()
         activities_dict = [activity_to_dict(activity) for activity in activities]
-        print(activities_dict)
+        print(activities_regs_dict)
         form = ActivitiesRegistrationForm()
         # 如果有錯誤，返回報名表單頁面並顯示錯誤信息
         return render_template("ActivitiesRegistration.html", form=form, activities=activities_dict, user_activities=activities_regs_dict)
@@ -540,15 +550,36 @@ def activity_to_dict(activity):
         'fee': activity.fee,
         'image_url': activity.image_url,
         'location': activity.location,
+        'status': activity.status
     }
 
 def activities_reg_to_dict(activities_reg):
     return {
         'id': activities_reg.activity.id,
         'name': activities_reg.activity.name,
-        'event_date': activities_reg.activity.event_date
+        'event_date': activities_reg.activity.event_date,
+        'status': activities_reg.activity.status
     }
 
+# 取消報名
+@app.route('/CancelRegistration', methods=['POST'])
+def cancel_registration():
+    try:
+        data = request.get_json()
+        activity_id = data.get('activity_id')
+        user_id = current_user.id
+        # Find the registration entry
+        registration = Activities_reg_rec.query.filter_by(user_id=user_id, activity_id=activity_id).first()
+
+        if registration:
+            db.session.delete(registration)
+            db.session.commit()
+            return jsonify({"message": "Registration cancelled successfully."}), 200
+        else:
+            return jsonify({"message": "Registration not found."}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('error.html', message="Page not found: 404"), 404
