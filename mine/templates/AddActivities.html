@@ -536,285 +536,282 @@
       </div>
     </div>
     <script>
-            var currentEditId = null;
-      <<<<<<< HEAD
-            // 获取所有编辑按钮
-            var editButtons = document.querySelectorAll(".edit-btn");
+      var currentEditId = null;
 
-            // 为每个编辑按钮添加点击事件监听器
-            editButtons.forEach(function (button) {
-              button.addEventListener("click", function () {
-                // 获取当前编辑的活动ID
-                currentEditId = this.getAttribute("data-id");
+      // 获取所有编辑按钮
+      var editButtons = document.querySelectorAll(".edit-btn");
 
-                // 获取活动的详细信息并填充到编辑模态框中
-                fetch(`/GetActivityDetail?id=${currentEditId}`)
-                  .then((response) => response.json())
-                  .then((data) => {
-                    document.getElementById("editName").value = data.name;
-                    document.getElementById("editDate").value = data.event_date;
-                    document.getElementById("editLocation").value = data.location;
-                    document.getElementById("editFee").value = data.fee;
-                    document.getElementById("editDescription").value =
-                      data.description;
-                    document.getElementById("editImage").value = data.image_url;
-                    // 显示编辑模态框
-                    var modal = new bootstrap.Modal(
-                      document.getElementById("editModal")
-                    );
-                    modal.show();
-                  })
-                  .catch((error) => console.error("Error:", error));
-              });
-            });
+      // 为每个编辑按钮添加点击事件监听器
+      editButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          // 获取当前编辑的活动ID
+          currentEditId = this.getAttribute("data-id");
 
-            // 监听保存按钮点击事件
-            document
-              .getElementById("saveEditButton")
-              .addEventListener("click", function () {
-                var name = document.getElementById("editName").value;
-                var date = document.getElementById("editDate").value;
-                var location = document.getElementById("editLocation").value;
-                var fee = document.getElementById("editFee").value;
-                var description = document.getElementById("editDescription").value;
-                var imageInput = document.getElementById("editImage");
-
-                if (!isNumeric(fee)) {
-                  alert("報名費用必須是有效的數字！");
-                  return;
-                }
-
-                //获取上传的图片文件
-                var file = imageInput.files[0];
-
-                var formData = new FormData();
-                formData.append("id", currentEditId);
-                formData.append("image", file);
-                formData.append("activitiyname", name);
-                formData.append("event_date", date);
-                formData.append("location", location);
-                formData.append("fee", fee);
-                formData.append("description", description);
-
-                if (!imageInput.files || !imageInput.files[0]) {
-                  alert("請上傳活動照片");
-                  return;
-                }
-
-                fetch(`/UpdateActivity`, {
-                  method: "POST",
-                  body: formData,
-                })
-                  .then((response) => response.json())
-                  .then((data) => {
-                    if (data.success) {
-                      location.reload(); // 刷新页面以反映更改
-                    } else {
-                      alert("更新活動失敗！");
-                    }
-                  })
-                  .catch((error) => console.error("Error:", error));
-              });
-
-      =======
-
-            function formatDate(date) {
-              const year = date.getFullYear();
-              const month = (date.getMonth() + 1).toString().padStart(2, "0");
-              const day = date.getDate().toString().padStart(2, "0");
-              return `${year}-${month}-${day}`;
-            }
-
-            function editActivity(id) {
-              // 获取当前编辑的活动ID
-              currentEditId = id;
-              console.log(currentEditId);
-              // 获取活动的详细信息并填充到编辑模态框中
-              fetch(`/GetActivityDetail?id=${currentEditId}`)
-                .then((response) => response.json())
-                .then((data) => {
-                  document.getElementById("editName").value = data.name;
-                  document.getElementById("editDate").value = formatDate(
-                    new Date(data.event_date)
-                  );
-                  console.log(formatDate(new Date(data.event_date)));
-                  document.getElementById("editLocation").value = data.location;
-                  document.getElementById("editFee").value = data.fee;
-                  document.getElementById("editDescription").value = data.description;
-                  // 將 image_url 賦值給 input type="file" 元素
-                  const imageUrl = data.image_url;
-                  console.log(imageUrl);
-                  const file = new File([imageUrl], data.name, {
-                    type: "image/jpeg",
-                  }); // 創建 File 物件
-                  const fileInput = document.getElementById("editImage");
-                  const fileList = new DataTransfer(); // 創建 DataTransfer 物件
-                  fileList.items.add(file); // 將 File 物件添加到 DataTransfer 中
-                  fileInput.files = fileList.files;
-
-                  // 显示编辑模态框
-                  var modal = new bootstrap.Modal(
-                    document.getElementById("editModal")
-                  );
-                  modal.show();
-                })
-                .catch((error) => console.error("Error:", error));
-            }
-
-            // 监听保存按钮点击事件
-            function saveEditActivity() {
-              var name = document.getElementById("editName").value;
-              var date = document.getElementById("editDate").value;
-              var location = document.getElementById("editLocation").value;
-              var fee = document.getElementById("editFee").value;
-              var description = document.getElementById("editDescription").value;
-              var imageInput = document.getElementById("editImage");
-
-              if (!isNumeric(fee)) {
-                alert("報名費用必須是有效的數字！");
-                return;
-              }
-
-              //获取上传的图片文件
-              var file = imageInput.files[0];
-
-              var formData = new FormData();
-              formData.append("id", currentEditId);
-              formData.append("image_file", file);
-              formData.append("activityname", name);
-              formData.append("event_date", date);
-              formData.append("location", location);
-              formData.append("fee", fee);
-              formData.append("description", description);
-
-              if (!imageInput.files || !imageInput.files[0]) {
-                alert("請上傳活動照片");
-                return;
-              }
-
-              fetch(`/UpdateActivity`, {
-                method: "POST",
-                body: formData,
-              })
-                .then((response) => response.json())
-                .then((data) => {
-                  if (data.success) {
-                    window.location.reload(); // 刷新页面以反映更改
-                  } else {
-                    alert("更新活動失敗！");
-                  }
-                })
-                .catch((error) => console.error("Error:", error));
-            }
-
-      >>>>>>> eced3f69afcfc4cb26e53aaff3d60f33b67bcbee
-            function isNumeric(value) {
-              // 使用正则表达式验证值是否为有效的数字（可以包括小数点）
-              return (
-                !isNaN(value) && value.trim() !== "" && /^-?\d+(\.\d+)?$/.test(value)
+          // 获取活动的详细信息并填充到编辑模态框中
+          fetch(`/GetActivityDetail?id=${currentEditId}`)
+            .then((response) => response.json())
+            .then((data) => {
+              document.getElementById("editName").value = data.name;
+              document.getElementById("editDate").value = data.event_date;
+              document.getElementById("editLocation").value = data.location;
+              document.getElementById("editFee").value = data.fee;
+              document.getElementById("editDescription").value =
+                data.description;
+              document.getElementById("editImage").value = data.image_url;
+              // 显示编辑模态框
+              var modal = new bootstrap.Modal(
+                document.getElementById("editModal")
               );
+              modal.show();
+            })
+            .catch((error) => console.error("Error:", error));
+        });
+      });
+
+      // 监听保存按钮点击事件
+      document
+        .getElementById("saveEditButton")
+        .addEventListener("click", function () {
+          var name = document.getElementById("editName").value;
+          var date = document.getElementById("editDate").value;
+          var location = document.getElementById("editLocation").value;
+          var fee = document.getElementById("editFee").value;
+          var description = document.getElementById("editDescription").value;
+          var imageInput = document.getElementById("editImage");
+
+          if (!isNumeric(fee)) {
+            alert("報名費用必須是有效的數字！");
+            return;
+          }
+
+          //获取上传的图片文件
+          var file = imageInput.files[0];
+
+          var formData = new FormData();
+          formData.append("id", currentEditId);
+          formData.append("image", file);
+          formData.append("activitiyname", name);
+          formData.append("event_date", date);
+          formData.append("location", location);
+          formData.append("fee", fee);
+          formData.append("description", description);
+
+          if (!imageInput.files || !imageInput.files[0]) {
+            alert("請上傳活動照片");
+            return;
+          }
+
+          fetch(`/UpdateActivity`, {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                location.reload(); // 刷新页面以反映更改
+              } else {
+                alert("更新活動失敗！");
+              }
+            })
+            .catch((error) => console.error("Error:", error));
+        });
+
+      function formatDate(date) {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        const day = date.getDate().toString().padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      function editActivity(id) {
+        // 获取当前编辑的活动ID
+        currentEditId = id;
+        console.log(currentEditId);
+        // 获取活动的详细信息并填充到编辑模态框中
+        fetch(`/GetActivityDetail?id=${currentEditId}`)
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("editName").value = data.name;
+            document.getElementById("editDate").value = formatDate(
+              new Date(data.event_date)
+            );
+            console.log(formatDate(new Date(data.event_date)));
+            document.getElementById("editLocation").value = data.location;
+            document.getElementById("editFee").value = data.fee;
+            document.getElementById("editDescription").value = data.description;
+            // 將 image_url 賦值給 input type="file" 元素
+            const imageUrl = data.image_url;
+            console.log(imageUrl);
+            const file = new File([imageUrl], data.name, {
+              type: "image/jpeg",
+            }); // 創建 File 物件
+            const fileInput = document.getElementById("editImage");
+            const fileList = new DataTransfer(); // 創建 DataTransfer 物件
+            fileList.items.add(file); // 將 File 物件添加到 DataTransfer 中
+            fileInput.files = fileList.files;
+
+            // 显示编辑模态框
+            var modal = new bootstrap.Modal(
+              document.getElementById("editModal")
+            );
+            modal.show();
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      // 监听保存按钮点击事件
+      function saveEditActivity() {
+        var name = document.getElementById("editName").value;
+        var date = document.getElementById("editDate").value;
+        var location = document.getElementById("editLocation").value;
+        var fee = document.getElementById("editFee").value;
+        var description = document.getElementById("editDescription").value;
+        var imageInput = document.getElementById("editImage");
+
+        if (!isNumeric(fee)) {
+          alert("報名費用必須是有效的數字！");
+          return;
+        }
+
+        //获取上传的图片文件
+        var file = imageInput.files[0];
+
+        var formData = new FormData();
+        formData.append("id", currentEditId);
+        formData.append("image_file", file);
+        formData.append("activityname", name);
+        formData.append("event_date", date);
+        formData.append("location", location);
+        formData.append("fee", fee);
+        formData.append("description", description);
+
+        if (!imageInput.files || !imageInput.files[0]) {
+          alert("請上傳活動照片");
+          return;
+        }
+
+        fetch(`/UpdateActivity`, {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              window.location.reload(); // 刷新页面以反映更改
+            } else {
+              alert("更新活動失敗！");
             }
+          })
+          .catch((error) => console.error("Error:", error));
+      }
 
-            // 要删除的卡片元素
-            var cardToDelete = null;
-            // 獲取所有刪除按鈕並添加點擊事件
-            document.querySelectorAll(".delete-btn").forEach((button) => {
-              button.addEventListener("click", function () {
-                currentEditId = this.getAttribute("data-id");
-              });
-            });
+      function isNumeric(value) {
+        // 使用正则表达式验证值是否为有效的数字（可以包括小数点）
+        return (
+          !isNaN(value) && value.trim() !== "" && /^-?\d+(\.\d+)?$/.test(value)
+        );
+      }
 
-            // 获取模态框中的确认删除按钮
-            var confirmDeleteButton = document.getElementById("confirmDeleteButton");
-            // 为确认删除按钮添加点击事件监听器
-            function deleteActivity() {
-              console.log(currentEditId);
-              if (!currentEditId) return;
+      // 要删除的卡片元素
+      var cardToDelete = null;
+      // 獲取所有刪除按鈕並添加點擊事件
+      document.querySelectorAll(".delete-btn").forEach((button) => {
+        button.addEventListener("click", function () {
+          currentEditId = this.getAttribute("data-id");
+        });
+      });
 
-              fetch("/DeleteActivity", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: "id=" + currentEditId,
-              })
-                .then((response) => response.json())
-                .then((data) => {
-                  if (data.success) {
-                    cardToDelete = document.querySelector(
-                      `.col[data_id='${currentEditId}']`
-                    );
-                    if (cardToDelete) {
-                      cardToDelete.remove();
-                      cardToDelete = null; // 重置cardToDelete
-                    }
+      // 获取模态框中的确认删除按钮
+      var confirmDeleteButton = document.getElementById("confirmDeleteButton");
+      // 为确认删除按钮添加点击事件监听器
+      function deleteActivity() {
+        console.log(currentEditId);
+        if (!currentEditId) return;
 
-                    // 关闭模态框
-                    var modal = document.getElementById("Confirm-Modal");
-                    var modalInstance = bootstrap.Modal.getInstance(modal);
-                    modalInstance.hide();
-                  } else {
-                    alert("删除活动失败：" + data.error);
-                  }
-                })
-                .catch((error) => {
-                  console.error("Error:", error);
-                });
-            }
-            //----------------------------新增活動---------------------------------
-
-            function addActivity() {
-              // 取得表單數據
-              var imageInput = document.getElementById("newImage");
-              var name = document.getElementById("newName").value;
-              var date = document.getElementById("newDate").value;
-              var location = document.getElementById("newLocation").value;
-              var fee = document.getElementById("newFee").value;
-              var description = document.getElementById("newDescription").value;
-
-              // 檢查是否有選擇圖片
-              if (!imageInput.files || !imageInput.files[0]) {
-                alert("請上傳活動照片");
-                return;
+        fetch("/DeleteActivity", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: "id=" + currentEditId,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              cardToDelete = document.querySelector(
+                `.col[data_id='${currentEditId}']`
+              );
+              if (cardToDelete) {
+                cardToDelete.remove();
+                cardToDelete = null; // 重置cardToDelete
               }
 
-              if (!isNumeric(fee)) {
-                alert("報名費用必須是有效的數字！");
-                return;
-              }
+              // 关闭模态框
+              var modal = document.getElementById("Confirm-Modal");
+              var modalInstance = bootstrap.Modal.getInstance(modal);
+              modalInstance.hide();
+            } else {
+              alert("删除活动失败：" + data.error);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+      //----------------------------新增活動---------------------------------
 
-              //获取上传的图片文件
-              var file = imageInput.files[0];
+      function addActivity() {
+        // 取得表單數據
+        var imageInput = document.getElementById("newImage");
+        var name = document.getElementById("newName").value;
+        var date = document.getElementById("newDate").value;
+        var location = document.getElementById("newLocation").value;
+        var fee = document.getElementById("newFee").value;
+        var description = document.getElementById("newDescription").value;
 
-              var formData = new FormData();
-              formData.append("image", file);
-              formData.append("activitiyname", name);
-              formData.append("date", date);
-              formData.append("location", location);
-              formData.append("fee", fee);
-              formData.append("description", description);
+        // 檢查是否有選擇圖片
+        if (!imageInput.files || !imageInput.files[0]) {
+          alert("請上傳活動照片");
+          return;
+        }
 
-              // 使用 Fetch API 发送 POST 请求到后端 Flask 路由
-              fetch("/Add_activities", {
-                method: "POST",
-                body: formData,
-              })
-                .then((response) => {
-                  if (response.ok) {
-                    return response.json();
-                  } else {
-                    alert("添加活動失敗！");
-                    throw new Error("添加活動失敗！");
-                  }
-                })
-                .then((data) => {
-                  // 創建新的卡片元素
-                  const cardContainer = document.querySelector(".row-cols-1");
-                  const newCard = document.createElement("div");
-                  newCard.classList.add("col");
-                  newCard.setAttribute("data_id", data.id);
+        if (!isNumeric(fee)) {
+          alert("報名費用必須是有效的數字！");
+          return;
+        }
 
-                  newCard.innerHTML = `
+        //获取上传的图片文件
+        var file = imageInput.files[0];
+
+        var formData = new FormData();
+        formData.append("image", file);
+        formData.append("activitiyname", name);
+        formData.append("date", date);
+        formData.append("location", location);
+        formData.append("fee", fee);
+        formData.append("description", description);
+
+        // 使用 Fetch API 发送 POST 请求到后端 Flask 路由
+        fetch("/Add_activities", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              alert("添加活動失敗！");
+              throw new Error("添加活動失敗！");
+            }
+          })
+          .then((data) => {
+            // 創建新的卡片元素
+            const cardContainer = document.querySelector(".row-cols-1");
+            const newCard = document.createElement("div");
+            newCard.classList.add("col");
+            newCard.setAttribute("data_id", data.id);
+
+            newCard.innerHTML = `
                           <div class="card h-100">
                               <div class="image-container">
                                 <a href="/ActivityDetail?activity_id=${data.id}">
@@ -835,19 +832,19 @@
                           </div>
                       `;
 
-                  cardContainer.appendChild(newCard);
-                  document.getElementById("activityForm").reset();
+            cardContainer.appendChild(newCard);
+            document.getElementById("activityForm").reset();
 
-                  // 隱藏模態對話框
-                  var modal = bootstrap.Modal.getInstance(
-                    document.getElementById("exampleModal")
-                  );
-                  modal.hide();
-                })
-                .catch((error) => {
-                  console.error("Error:", error);
-                });
-            }
+            // 隱藏模態對話框
+            var modal = bootstrap.Modal.getInstance(
+              document.getElementById("exampleModal")
+            );
+            modal.hide();
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
     </script>
     <script
       src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
