@@ -337,7 +337,7 @@
     </div>
     <div class="scroll-body">
       <div id="offcanvas-body"></div>
-      <div class="inCart-buyNow" style="margin: 20px; padding: 10px">
+      <div class="inCart-buyNow" id="checkout-button" style="margin: 20px; padding: 10px">
         去買單
       </div>
     </div>
@@ -355,13 +355,12 @@
         {% endif %}
         {% endwith %}
         <div class="centered-div">
-          <form method="POST" action={{ url_for('login') }} class="text">
+          <form method="POST" id="login-form" action={{ url_for('login') }} class="text">
           {{ form.hidden_tag() }}
             <h2 style="font-weight: 900">登入</h2>
-            <p style="color:#143032">{{ error_message }}</p>
-            <input type="text1" id="input-email" name="email" placeholder="電子信箱" />
+            <input type="text1" id="input-email" name="email" placeholder="請輸入電子信箱" />
             <div class="pwd-container">
-              <input type="password" id="input-pwd" name="password" placeholder="密碼" />
+              <input type="password" id="input-pwd" name="password" placeholder="請輸入密碼" />
             </div>
             <div class="member_type">
               <label>
@@ -376,11 +375,12 @@
             <a class = "for_pwd"href="#">忘記密碼?</a>
             <br>
             <input type="submit" class="login-button" value="登入 MissGreen !" style="font-weight: 600; cursor: pointer">
-            
-            <!--<div class="isfarmer">
-              <a href="">我是農夫</a>
-            </div>!-->
           </form>
+          {% with messages = get_flashed_messages() %} {% if messages %}
+          <script>
+            alert("{{ messages[0] }}");
+          </script>
+          {% endif %} {% endwith %}
           <!-- 將圖片包裹在一個 <div> 容器中 -->
           <div class="image-container">
             <img
@@ -459,43 +459,106 @@
     </div>
     <!--JS Start-->
     <script>
-      // 獲取輸入框元素
-      const InputEmail = document.getElementById("input-email");
+      function login(){
+        const email = document.getElementById("input-email").value;      
+        const password = document.getElementById("input-pwd").value;
+        const identity = document.querySelector('input[name="identity"]:checked').value;
 
-      // 點擊輸入框時更改預設文字
-      InputEmail.addEventListener("focus", function () {
-        // 更改預設文字
-        InputEmail.placeholder = "請輸入電子信箱";
+        var formData = new FormData();
+          formData.append("email", email);
+          formData.append("password", password);
+          formData.append("identity", identity);
+
+        // 使用 Fetch API 发送 POST 请求到后端 Flask 路由
+        // 使用 Fetch API 发送 POST 请求到后端 Flask 路由
+        fetch("/login", {
+          method: "POST",
+          body: formData,
+        })
+        .then((response) => {
+          if (response.ok) {
+          // 解析后端返回的 JSON 数据
+          console.log(response);
+          return response.json();
+          } else {
+            alert("登入失敗！");
+            throw new Error("Network response was not ok");
+          }
+        })
+        .then((data) => {
+          if (data.success) {
+            window.location.href = $(data.next_url); // 重定向到登录成功后的页面
+          } else {
+              alert(data.error_message); // 显示错误信息
+          }
+        })
+        .catch((error) => {
+          console.error("There was a problem with the fetch operation:", error);
+        });
+      }
+
+      // 页面加载时更新购物车显示
+      document.addEventListener("DOMContentLoaded", function () {
+        const cart = getCartFromCookies(); // 从 Cookie 中获取购物车数据
+        updateCartUI(cart); // 更新购物车显示
       });
-      const InputPwd = document.getElementById("input-pwd");
 
-      // 點擊輸入框時更改預設文字
-      InputPwd.addEventListener("focus", function () {
-        // 更改預設文字
-        InputPwd.placeholder = "密碼（至少８個字元）";
-      });
-      // 定义事件处理函数
-      //function ToSignup() {
-        // 获取输入值
-        //const email = InputEmail.value;
-        //const password = InputPwd.value;
+      // 定义函数：从Cookies中获取购物车数据
+      function getCartFromCookies() {
+        const cartCookie = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("cart="));
+        if (cartCookie) {
+          return JSON.parse(cartCookie.split("=")[1]);
+        } else {
+          return {};
+        }
+      }
 
-        // 在这里可以继续执行您想要的操作
-        // 例如将数据发送到后端或执行表单提交
+      // 定义函数：更新购物车UI显示
+      function updateCartUI(cart) {
+        const offcanvasBody = document.getElementById("offcanvas-body");
+        offcanvasBody.innerHTML = ""; // 清空当前购物车显示内容
+        let totalPrice = 0; // 初始化总价为0
 
-      //}
-      // 为按钮添加点击事件处理函数
-          // 在页面加载完成后执行
-      window.onload = function() {
-        var emailInput = document.getElementById("input-email");
-        "{{ form.email.data }}" = emailInput.value;
-        // 获取密码输入框元素
-        var passwordInput = document.getElementById("input-pwd");
-        // 设置密码输入框的默认值
-        "{{ form.password.data }}" = passwordInput.value;
-        var identityInput = document.querySelector('input[name="identity"]:checked').value;
-        "{{ form.identity.data }}" = identityInput.value;
-      };
+        for (const [product, details] of Object.entries(cart)) {
+          console.log(details.price);
+          console.log(details.quantity);
+          const productTotal = details.price * details.quantity;
+          const productInfoDiv = document.createElement("div");
+          productInfoDiv.textContent = `${product} * ${
+            details.quantity
+          } - NT$${productTotal.toFixed(2)}`;
+          offcanvasBody.appendChild(productInfoDiv);
+
+          totalPrice += productTotal; // 累加总价
+        }
+
+        // 创建并添加总价显示
+        const totalPriceDiv = document.createElement("div");
+        totalPriceDiv.textContent = `總價: NT$${totalPrice.toFixed(2)}`;
+        totalPriceDiv.style.fontWeight = "bold";
+        totalPriceDiv.style.marginTop = "10px";
+        offcanvasBody.appendChild(totalPriceDiv);
+      }
+
+      document
+        .getElementById("checkout-button")
+        .addEventListener("click", function () {
+          if (!isLoggedIn()) {
+            alert("請先登入再結帳！");
+            // 这里可以跳转到登录页面
+            window.location.href = "/login";
+          } else {
+            // 跳转到结账页面或执行结账操作
+            window.location.href = "/Checkout";
+          }
+        });
+
+      function isLoggedIn() {
+        // 检查是否存在名为 "user_id" 的 session
+        return "{{ is_logged_in }}";
+      }
 
     </script>
     <script

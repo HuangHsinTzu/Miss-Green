@@ -22,7 +22,7 @@
       rel="stylesheet"
     />
     <style>
-a {
+      a {
         text-decoration: none;
         text-align: center;
         color: #000000;
@@ -102,7 +102,6 @@ a {
         font-size: xx-large;
         font-family: "Sacramento", cursive;
       }
-
     </style>
   </head>
   <body>
@@ -295,7 +294,9 @@ a {
       aria-labelledby="offcanvasExampleLabel"
     >
       <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasExampleLabel">購物車內容：</h5>
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">
+          您的購物車內容：
+        </h5>
         <button
           type="button"
           class="btn-close"
@@ -305,7 +306,11 @@ a {
       </div>
       <div class="scroll-body">
         <div id="offcanvas-body"></div>
-        <div class="inCart-buyNow" style="margin: 20px; padding: 10px">
+        <div
+          class="inCart-buyNow"
+          id="checkout-button"
+          style="margin: 20px; padding: 10px"
+        >
           去買單
         </div>
       </div>
@@ -440,6 +445,70 @@ a {
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
+    <script>
+      // 页面加载时更新购物车显示
+      document.addEventListener("DOMContentLoaded", function () {
+        const cart = getCartFromCookies(); // 从 Cookie 中获取购物车数据
+        updateCartUI(cart); // 更新购物车显示
+      });
+
+      // 定义函数：从Cookies中获取购物车数据
+      function getCartFromCookies() {
+        const cartCookie = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("cart="));
+        if (cartCookie) {
+          return JSON.parse(cartCookie.split("=")[1]);
+        } else {
+          return {};
+        }
+      }
+
+      // 定义函数：更新购物车UI显示
+      function updateCartUI(cart) {
+        const offcanvasBody = document.getElementById("offcanvas-body");
+        offcanvasBody.innerHTML = ""; // 清空当前购物车显示内容
+        let totalPrice = 0; // 初始化总价为0
+
+        for (const [product, details] of Object.entries(cart)) {
+          console.log(details.price);
+          console.log(details.quantity);
+          const productTotal = details.price * details.quantity;
+          const productInfoDiv = document.createElement("div");
+          productInfoDiv.textContent = `${product} * ${
+            details.quantity
+          } - NT$${productTotal.toFixed(2)}`;
+          offcanvasBody.appendChild(productInfoDiv);
+
+          totalPrice += productTotal; // 累加总价
+        }
+
+        // 创建并添加总价显示
+        const totalPriceDiv = document.createElement("div");
+        totalPriceDiv.textContent = `總價: NT$${totalPrice.toFixed(2)}`;
+        totalPriceDiv.style.fontWeight = "bold";
+        totalPriceDiv.style.marginTop = "10px";
+        offcanvasBody.appendChild(totalPriceDiv);
+      }
+
+      document
+        .getElementById("checkout-button")
+        .addEventListener("click", function () {
+          if (!isLoggedIn()) {
+            alert("請先登入再結帳！");
+            // 这里可以跳转到登录页面
+            window.location.href = "/login?next=/Checkout";
+          } else {
+            // 跳转到结账页面或执行结账操作
+            window.location.href = "/Checkout";
+          }
+        });
+
+      function isLoggedIn() {
+        // 检查是否存在名为 "user_id" 的 session
+        return "{{ is_logged_in }}";
+      }
+    </script>
   </body>
 </html>
 <!--Updated:

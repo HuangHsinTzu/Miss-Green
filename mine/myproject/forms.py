@@ -26,22 +26,19 @@ class RegistrationForm(FlaskForm):
         """檢查Email"""
         if self.identity.data == "user":
             if User.query.filter_by(email=self.email.data).first():
-                raise ValidationError('(電子郵件已經被註冊過了!)')
+                raise ValidationError('電子郵件已經被註冊過了!')
         elif self.identity.data == "farmer":
             if Farmer.query.filter_by(email=self.email.data).first():
-                raise ValidationError('(電子郵件已經被註冊過了!)')
+                raise ValidationError('電子郵件已經被註冊過了!')
 
     def check_username(self):
         """檢查username"""
         if self.identity.data == "user":
             if User.query.filter_by(username=self.username.data).first():
-                raise ValidationError('(使用者名稱已經存在!)')
+                raise ValidationError('使用者名稱已經存在!')
         elif self.identity.data == "farmer":
             if Farmer.query.filter_by(username=self.username.data).first():
-                raise ValidationError('(使用者名稱已經存在!)')
-
-    def __repr__(self):
-        return 'username:%s, email:%s' % (self.username, self.email)
+                raise ValidationError('使用者名稱已經存在!')
 
 #上架商品表單
 class UploadForm(FlaskForm):

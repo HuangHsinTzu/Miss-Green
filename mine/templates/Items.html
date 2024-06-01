@@ -335,7 +335,9 @@
       aria-labelledby="offcanvasExampleLabel"
     >
       <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasExampleLabel">購物車內容：</h5>
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">
+          您的購物車內容：
+        </h5>
         <button
           type="button"
           class="btn-close"
@@ -345,22 +347,22 @@
       </div>
       <div class="scroll-body">
         <div id="offcanvas-body"></div>
-        <div class="inCart-buyNow" style="margin: 20px; padding: 10px">
+        <div class="inCart-buyNow" id="checkout-button" style="margin: 20px; padding: 10px">
           去買單
         </div>
       </div>
     </div>
     <h1 class="Label">全部商品 | ALL ITEMS</h1>
     <nav
-    style="--bs-breadcrumb-divider: '>'"
-    aria-label="breadcrumb"
-    class="breadcrumb_list"
-  >
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="Index.html">首頁</a></li>
-      <li class="breadcrumb-item active" aria-current="page">全部商品</li>
-    </ol>
-  </nav>
+      style="--bs-breadcrumb-divider: '>'"
+      aria-label="breadcrumb"
+      class="breadcrumb_list"
+    >
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="Index.html">首頁</a></li>
+        <li class="breadcrumb-item active" aria-current="page">全部商品</li>
+      </ol>
+    </nav>
     <div class="parent-container">
       <div class="side_nav">
         <p>分類</p>
@@ -481,21 +483,71 @@
       fillProductContainer(products.filter(product => product.category === '水果'), 'fruits');
       fillProductContainer(products.filter(product => product.category === '蛋類'), 'eggs');
 
-            document.addEventListener("DOMContentLoaded", function () {
-                  // 獲取購物車內容容器
-              const cartContent = document.getElementById("cartContent");
+      // 页面加载时更新购物车显示
+      document.addEventListener("DOMContentLoaded", function () {
+        const cart = getCartFromCookies(); // 从 Cookie 中获取购物车数据
+        updateCartUI(cart); // 更新购物车显示
+      });
 
-                  // 獲取購物車圖標
-              const cartIcon = document.querySelector(".bi-cart");
+      // 定义函数：从Cookies中获取购物车数据
+      function getCartFromCookies() {
+        const cartCookie = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("cart="));
+        if (cartCookie) {
+          return JSON.parse(cartCookie.split("=")[1]);
+        } else {
+          return {};
+        }
+      }
 
-                  // 添加點擊事件監聽器
-                  /*cartIcon.addEventListener("click", function () {
-                    // 切換購物車內容容器的顯示狀態
-                    cartContent.classList.toggle("visible");
-                  });*/
-              const memberButton = document.querySelector(".bi-person");
-              console.log("jfjefofjroi"); // 打印选择到的元素
-            });
+      // 定义函数：更新购物车UI显示
+      function updateCartUI(cart) {
+        const offcanvasBody = document.getElementById("offcanvas-body");
+        offcanvasBody.innerHTML = ""; // 清空当前购物车显示内容
+        let totalPrice = 0; // 初始化总价为0
+
+        for (const [product, details] of Object.entries(cart)) {
+          console.log(details.price);
+          console.log(details.quantity);
+          const productTotal = details.price * details.quantity;
+          const productInfoDiv = document.createElement("div");
+          productInfoDiv.textContent = `${product} * ${
+            details.quantity
+          } - NT$${productTotal.toFixed(2)}`;
+          offcanvasBody.appendChild(productInfoDiv);
+
+          totalPrice += productTotal; // 累加总价
+        }
+
+        // 创建并添加总价显示
+        const totalPriceDiv = document.createElement("div");
+        totalPriceDiv.textContent = `總價: NT$${totalPrice.toFixed(2)}`;
+        totalPriceDiv.style.fontWeight = "bold";
+        totalPriceDiv.style.marginTop = "10px";
+        offcanvasBody.appendChild(totalPriceDiv);
+      }
+
+      document
+        .getElementById("checkout-button")
+        .addEventListener("click", function () {
+          if (!isLoggedIn()) {
+            alert("請先登入再結帳！");
+            // 这里可以跳转到登录页面
+            window.location.href = "/login";
+          } else {
+            // 跳转到结账页面或执行结账操作
+            window.location.href = "/Checkout";
+          }
+        });
+
+      function isLoggedIn() {
+        // 检查是否存在名为 "user_id" 的 session
+        return "{{ is_logged_in }}";
+      }
+    </script>
+
+      
     </script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

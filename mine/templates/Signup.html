@@ -325,7 +325,7 @@
     </div>
     <div class="scroll-body">
       <div id="offcanvas-body"></div>
-      <div class="inCart-buyNow" style="margin: 20px; padding: 10px">
+      <div class="inCart-buyNow" id="checkout-button" style="margin: 20px; padding: 10px">
         去買單
       </div>
     </div>
@@ -338,7 +338,6 @@
             <form method="POST" action={{ url_for('signup') }} class="text">
               {{ form.hidden_tag() }}
               <h2 style="font-weight: 900">註冊</h2>
-              <p id="error-message" style="color:#143032">{{ error_message }}</p>
               <input type="text1" id="input-name" name="username" pattern="[a-zA-Z]+" title="只能使用英文字母~" placeholder="帳號名稱" required />
               <input type="email" id="input-email" name="email" placeholder="電子信箱" title="請輸入有效電子信箱~" required/>
               <input type="text1" id="input-pwd" name="password" pattern=".{8,}" title="請輸入至少8位數~" placeholder="密碼" required/>
@@ -356,7 +355,11 @@
               </div>
               <input type="submit" class="signup-button" value="成為會員！" style="font-weight: 600; cursor: pointer">
             </form>   
-              
+        {% with messages = get_flashed_messages() %} {% if messages %}
+        <script>
+          alert("{{ messages[0] }}");
+        </script>
+        {% endif %} {% endwith %}
         </div>
           <!-- 將圖片包裹在一個 <div> 容器中 -->
           <div class="image-container">
@@ -440,60 +443,111 @@
     </div>
     
     <script>
+      function signup(){
+        const name = document.getElementById("input-name").value;
+        const phone = document.getElementById("input-phone").value;
+        const email = document.getElementById("input-email").value;
+        const password = document.getElementById("input-pwd").value;
+        const passwordConfirm = document.getElementById("input-pwd2").value;
+        const identity = document.querySelector('input[name="identity"]:checked').value;
 
-      const InputName = document.getElementById("input-name");
+        var formData = new FormData();
+            formData.append("name", name);
+            formData.append("phone", phone);
+            formData.append("email", email);
+            formData.append("password", password);
+            formData.append("passwordConfirm", passwordConfirm);
+            formData.append("identity", identity);
 
-      InputName.addEventListener("focus", function () {
-        InputName.placeholder = "請輸入帳號名稱（限英文）";
+        // 使用 Fetch API 发送 POST 请求到后端 Flask 路由
+        fetch("/Signup", {
+          method: "POST",
+          body: formData,
+        })
+        .then((response) => {
+          if (response.ok) {
+          // 解析后端返回的 JSON 数据
+          console.log(response);
+          return response.json();
+          } else {
+            alert("註冊失敗！");
+            throw new Error("Network response was not ok");
+          }
+        })
+        .then((data) => {
+          if (data.success) {
+            window.location.href = $(data.next_url); // 重定向到登录成功后的页面
+          } else {
+              alert($(data.error_message)); // 显示错误信息
+          }
+        })
+        .catch((error) => {
+          console.error("There was a problem with the fetch operation:", error);
+        });
+      }
+
+      // 页面加载时更新购物车显示
+      document.addEventListener("DOMContentLoaded", function () {
+        const cart = getCartFromCookies(); // 从 Cookie 中获取购物车数据
+        updateCartUI(cart); // 更新购物车显示
       });
-      const InputPhone = document.getElementById("input-phone");
 
-      InputPhone.addEventListener("focus", function () {
-        InputPhone.placeholder = "請輸入有效手機號碼";
-      });
-      // 獲取輸入框元素
-      const InputEmail = document.getElementById("input-email");
-
-      // 點擊輸入框時更改預設文字
-      InputEmail.addEventListener("focus", function () {
-        // 更改預設文字
-        InputEmail.placeholder = "請輸入有效電子信箱";
-      });
-      const InputPwd = document.getElementById("input-pwd");
-
-      InputPwd.addEventListener("focus", function () {
-        InputPwd.placeholder = "密碼（至少８個字元）";
-      });
-
-      const InputPwd2 = document.getElementById("input-pwd2");
-
-      InputPwd2.addEventListener("focus", function () {
-        InputPwd2.placeholder = "再次輸入密碼（至少８個字元）";
-      });
-
-      window.onload = function() {
-        var emailInput = document.getElementById("input-email");
-        "{{ form.email.data }}" = emailInput.value;
-        // 获取密码输入框元素
-        var passwordInput = document.getElementById("input-pwd");
-        // 设置密码输入框的默认值
-        "{{ form.password.data }}" = passwordInput.value;
-        var userSignIn = document.getElementById("input-name");
-        "{{ form.username.data }}" = userSignIn.value;
-        var passwordInput2 = document.getElementById("input-pwd2");
-        "{{ form.pass_confirm.data }}" = passwordInput2.value;
-        var phoneInput = document.getElementById("input-phone");
-        "{{ form.phone.data }}" = phoneInput.value;
-        var identityInput = document.querySelector('input[name="identity"]:checked').value;
-        "{{ form.identity.data }}" = identityInput.value;
-      };
-
-      window.onload = function() {
-        var errorMessage = document.getElementById("error-message").innerHTML;
-        if (errorMessage !== '') {
-            alert(errorMessage);
+      // 定义函数：从Cookies中获取购物车数据
+      function getCartFromCookies() {
+        const cartCookie = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("cart="));
+        if (cartCookie) {
+          return JSON.parse(cartCookie.split("=")[1]);
+        } else {
+          return {};
         }
-      };
+      }
+
+      // 定义函数：更新购物车UI显示
+      function updateCartUI(cart) {
+        const offcanvasBody = document.getElementById("offcanvas-body");
+        offcanvasBody.innerHTML = ""; // 清空当前购物车显示内容
+        let totalPrice = 0; // 初始化总价为0
+
+        for (const [product, details] of Object.entries(cart)) {
+          console.log(details.price);
+          console.log(details.quantity);
+          const productTotal = details.price * details.quantity;
+          const productInfoDiv = document.createElement("div");
+          productInfoDiv.textContent = `${product} * ${
+            details.quantity
+          } - NT$${productTotal.toFixed(2)}`;
+          offcanvasBody.appendChild(productInfoDiv);
+
+          totalPrice += productTotal; // 累加总价
+        }
+
+        // 创建并添加总价显示
+        const totalPriceDiv = document.createElement("div");
+        totalPriceDiv.textContent = `總價: NT$${totalPrice.toFixed(2)}`;
+        totalPriceDiv.style.fontWeight = "bold";
+        totalPriceDiv.style.marginTop = "10px";
+        offcanvasBody.appendChild(totalPriceDiv);
+      }
+
+      document
+        .getElementById("checkout-button")
+        .addEventListener("click", function () {
+          if (!isLoggedIn()) {
+            alert("請先登入再結帳！");
+            // 这里可以跳转到登录页面
+            window.location.href = "/login";
+          } else {
+            // 跳转到结账页面或执行结账操作
+            window.location.href = "/Checkout";
+          }
+        });
+
+      function isLoggedIn() {
+        // 检查是否存在名为 "user_id" 的 session
+        return "{{ is_logged_in }}";
+      }
     </script>
     <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

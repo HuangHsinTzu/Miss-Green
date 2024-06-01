@@ -270,7 +270,9 @@
       aria-labelledby="offcanvasExampleLabel"
     >
       <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasExampleLabel">購物車內容：</h5>
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">
+          您的購物車內容：
+        </h5>
         <button
           type="button"
           class="btn-close"
@@ -280,7 +282,11 @@
       </div>
       <div class="scroll-body">
         <div id="offcanvas-body"></div>
-        <div class="inCart-buyNow" style="margin: 20px; padding: 10px">
+        <div
+          class="inCart-buyNow"
+          id="checkout-button"
+          style="margin: 20px; padding: 10px"
+        >
           結帳
         </div>
       </div>
@@ -319,6 +325,7 @@
             href="#offcanvasExample"
             role="button"
             aria-controls="offcanvasExample"
+            onclick="addToCart();"
           >
             加入購物車
           </div>
@@ -409,9 +416,9 @@
           // 更新输入框中的数量
           quantityInput.value = currentQuantity;
           // 使用 console.log 打印当前数量
-          console.log("当前数量:", currentQuantity);
+          console.log("當前數量:", currentQuantity);
         } else {
-          console.log("已达到最大库存数量:", maxQuantity);
+          console.log("已達到最大庫存數量:", maxQuantity);
         }
       }
 
@@ -427,7 +434,7 @@
           // 更新输入框中的数量
           quantityInput.value = currentQuantity;
           // 使用 console.log 打印当前数量
-          console.log("当前数量:", currentQuantity);
+          console.log("當前數量:", currentQuantity);
         }
       }
 
@@ -438,68 +445,134 @@
       document
         .getElementById("min_1")
         .addEventListener("click", decreaseQuantity);
-      //Member按鈕
-      const memberButton = document.querySelector(".bi-person");
-      var isLoggedIn = false;
-      function handleMemberButtonClick() {
-        console.log("function executed.");
-        if (isLoggedIn) {
-          //用户已登录，跳转到会员页面
-          window.location.href = "/Items";
-        } else {
-          //用户未登录，跳转到登录页面
-          window.location.href = "/Login";
-        }
-      }
 
-      // 为会员按钮添加点击事件处理函数
-      memberButton.addEventListener("click", handleMemberButtonClick);
-      function addToCart() {
-        const ProductName = document.querySelector("h3").textContent;
-        console.log(ProductName);
-        // 選擇 offcanvas-body 元素
-        const quantityInput = document.getElementById("quantity_1");
-        let currentQuantity = parseInt(quantityInput.value);
-        const offcanvasBody = document.getElementById("offcanvas-body");
-
-        // 获取商品价格
-        const price = parseFloat(
-          document.querySelector("h5").textContent.replace("NT$", "")
-        );
-        // 计算当前商品的总价
-        const total = currentQuantity * price;
-        // 更新购物车总价
-        updateTotalPrice(total);
-
-        // 創建一個新的 div 元素
-        const productInfoDiv = document.createElement("div");
-
-        // 將 ProductName 和 Quantity 的值添加到 div 中
-        productInfoDiv.textContent = `${ProductName} * ${currentQuantity}`;
-
-        // 將新的 div 元素添加到 offcanvas-body 元素中
-        offcanvasBody.appendChild(productInfoDiv);
-      }
-
-      function updateTotalPrice(total) {
-        // 找到显示总价的元素
-        const totalPriceElement = document.getElementById("total-price");
-
-        // 获取当前显示的总价并转换为数字
-        let currentTotal = parseFloat(
-          totalPriceElement.textContent.replace("Total Price: NT$", "")
-        );
-
-        // 计算新的总价
-        const newTotal = currentTotal + total;
-
-        // 更新总价的显示
-        totalPriceElement.textContent = `Total Price: NT$${newTotal}`;
-      }
-
-      const AddToCart_Button = document.querySelector(".add-to-cart");
-      AddToCart_Button.addEventListener("click", addToCart);
+      // 页面加载时更新购物车显示
+      const cart = getCartFromCookies();
+      updateCartUI(cart);
     });
+
+    function addToCart() {
+      const productName =
+        document.querySelector(".product-detail h1").textContent;
+      console.log(productName);
+      const quantityInput = document.getElementById("quantity_1");
+      let currentQuantity = parseInt(quantityInput.value);
+      const availableQuantity = parseInt(
+        document.querySelector(".inventory").textContent.split("：")[1]
+      );
+      console.log(availableQuantity);
+
+      // 获取商品价格
+      const price = parseFloat(
+        document
+          .querySelector(".product-detail h5")
+          .textContent.replace("NT$", "")
+          .trim()
+      );
+      console.log(price);
+
+      // 获取现有的购物车数据
+      let cart = getCartFromCookies();
+      // 检查购物车中已有的商品数量加上要购买的数量是否超过库存数量
+      if (
+        cart[productName] &&
+        cart[productName].quantity + currentQuantity > availableQuantity
+      ) {
+        alert("商品數量不足！無法加入購物車~");
+        return; // 停止执行后续代码
+      }
+
+      console.log(cart);
+      // 如果购物车中已有该商品，更新数量；否则新增商品
+      if (cart[productName]) {
+        cart[productName].quantity += currentQuantity;
+        cart[productName].price = price;
+      } else {
+        cart[productName] = {
+          quantity: currentQuantity,
+          price: price,
+        };
+      }
+
+      // 更新购物车到cookie
+      setCartToCookies(cart);
+      updateCartUI(cart);
+    }
+
+    // 定义函数：更新购物车UI显示
+    function updateCartUI(cart) {
+      const offcanvasBody = document.getElementById("offcanvas-body");
+      offcanvasBody.innerHTML = ""; // 清空当前购物车显示内容
+      let totalPrice = 0; // 初始化总价为0
+
+      for (const [product, details] of Object.entries(cart)) {
+        console.log(details.price);
+        console.log(details.quantity);
+        const productTotal = details.price * details.quantity;
+        const productInfoDiv = document.createElement("div");
+        productInfoDiv.textContent = `${product} * ${
+          details.quantity
+        } - NT$${productTotal.toFixed(2)}`;
+        offcanvasBody.appendChild(productInfoDiv);
+
+        totalPrice += productTotal; // 累加总价
+      }
+
+      // 创建并添加总价显示
+      const totalPriceDiv = document.createElement("div");
+      totalPriceDiv.textContent = `總價: NT$${totalPrice.toFixed(2)}`;
+      totalPriceDiv.style.fontWeight = "bold";
+      totalPriceDiv.style.marginTop = "10px";
+      offcanvasBody.appendChild(totalPriceDiv);
+    }
+
+    document
+      .getElementById("checkout-button")
+      .addEventListener("click", function () {
+        if (!isLoggedIn()) {
+          alert("請先登入再結帳！");
+          // 这里可以跳转到登录页面
+          window.location.href = "/login";
+        } else {
+          // 跳转到结账页面或执行结账操作
+          window.location.href = "/Checkout";
+        }
+      });
+
+    function isLoggedIn() {
+      // 检查是否存在名为 "user_id" 的 session
+      return "{{ is_logged_in }}";
+    }
+
+    // 页面加载时更新购物车显示
+    //document.addEventListener("DOMContentLoaded", function () {
+    //const cart = getCartFromCookies();
+    //updateCartUI(cart);
+    //});
+
+    //清空cookie
+    function clearCartCookies() {
+      document.cookie = "cart=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
+
+    // 定义函数：从Cookies中获取购物车数据
+    function getCartFromCookies() {
+      const cartCookie = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("cart="));
+      if (cartCookie) {
+        return JSON.parse(cartCookie.split("=")[1]);
+      } else {
+        return {};
+      }
+    }
+
+    // 定义函数：将购物车数据设置到Cookies中
+    function setCartToCookies(cart) {
+      console.log("Before setting cookie:", cart); // 添加调试语句
+      document.cookie = `cart=${JSON.stringify(cart)};path=/;max-age=31536000`; // Cookie有效期1年
+      console.log("After setting cookie:", document.cookie); // 添加调试语句
+    }
 
     // 获取 "buy-now" 元素
     const buyNowElement = document.querySelector(".inCart-buyNow");
@@ -529,7 +602,7 @@
       }
     });
   </script>
-    <script
+  <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"
