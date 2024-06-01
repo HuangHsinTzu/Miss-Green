@@ -80,8 +80,8 @@ class Farmer(UserMixin, db.Model):
             db.session.delete(product)
             db.session.commit()
 
-    def add_activity(self, image_url, name, event_date, location, fee, description):
-        new_activity = Activity(image_url=image_url, name=name, event_date=event_date, location=location, fee=fee, description=description, farmer_id=self.id)
+    def add_activity(self, image_url, name, event_date, location, fee, description, status):
+        new_activity = Activity(image_url=image_url, name=name, event_date=event_date, location=location, fee=fee, description=description, farmer_id=self.id, status=status)
         db.session.add(new_activity)
 
         return new_activity
@@ -203,6 +203,7 @@ class Activity(db.Model):
     location = db.Column(db.String(100), nullable=False)
     fee = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text, nullable=False)
+    status = db.Column(db.Text)
     
 
     farmer_id = db.Column(db.Integer, db.ForeignKey('farmers.id'), nullable=False)

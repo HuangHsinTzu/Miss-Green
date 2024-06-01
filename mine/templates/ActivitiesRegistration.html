@@ -427,7 +427,11 @@
                 <td>{{ activity.name }}</td>
                 <td>{{ activity.event_date }}</td>
                 <td><div id="countdown-{{ loop.index }}"></div></td>
+                {% if activity.status == "已取消" %}
+                <td style="color: rgb(210, 88, 88); font-weight: 600;">活動已取消</td>
+                {% else %}
                 <td><button data-id="{{ activity.id }}" class="cancelBtn" data-bs-toggle="modal" data-bs-target="#Confirm-Modal">取消報名</button></td>
+                {% endif %}
                 <script>
                     countdown("{{ activity.event_date }}", "countdown-{{ loop.index }}");
                 </script>
@@ -581,6 +585,12 @@
                   const card = document.createElement('div');
                   card.classList.add('card', 'col');
                   card.style.width = '18rem';
+                  
+                  // 添加条件以检查活动状态
+                  if (activity.status === "已取消") {
+                      card.style.opacity = '0.5'; // 设置透明度为0.5
+                  }
+                  
                   card.innerHTML = `
                       <div class="card-img-container">
                           <img src="${activity.image_url}" class="card-img-top" alt="${activity.name}" />
@@ -591,9 +601,23 @@
                           <a href="#" class="btn register-btn" data-bs-toggle="modal" data-bs-target="#editModal" onclick="setActivityIdAndInfo('${activity.id}', '${activity.name}', '${activity.event_date}', '${activity.location}', '${activity.fee}', '${activity.description}')">報名活動</a>
                       </div>
                   `;
+                  
+                  // 添加到 DOM 前先查找按钮并设置其禁用属性
+                  if (activity.status === "已取消") {
+                      const button = card.querySelector('.register-btn');
+                      if (button) {
+                          button.setAttribute('disabled', 'disabled');
+                          button.removeAttribute('onclick');
+                          button.removeAttribute('data-bs-target');
+                          console.log("11111");
+                      }
+                  }
+                  
                   cardContainer.appendChild(card);
               });
           }
+
+
   
           displayActivities(activities);
   

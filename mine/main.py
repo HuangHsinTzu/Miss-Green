@@ -342,6 +342,7 @@ def add_activities():
         fee = request.form['fee']
         description = request.form['description']
         image_file = request.files['image']
+        status = 1
         
         # 检查数据是否有效
         if not all([activityname, date, location, fee, description]) or not image_file:
@@ -448,7 +449,8 @@ def delete_activity():
     if not activity:
         return jsonify({'error': '活動未找到'}), 404
 
-    db.session.delete(activity)
+    # 将状态更新为 "0"
+    activity.status = "已取消"
     db.session.commit()
     return jsonify({'success': True})
 
@@ -529,7 +531,7 @@ def activitiesRegistration():
         activities_regs_dict = [activities_reg_to_dict(activities_reg) for activities_reg in activities_regs]
         activities = Activity.query.filter(Activity.event_date > current_time).all()
         activities_dict = [activity_to_dict(activity) for activity in activities]
-        #print(activities_dict)
+        print(activities_regs_dict)
         form = ActivitiesRegistrationForm()
         # 如果有錯誤，返回報名表單頁面並顯示錯誤信息
         return render_template("ActivitiesRegistration.html", form=form, activities=activities_dict, user_activities=activities_regs_dict)
@@ -544,13 +546,15 @@ def activity_to_dict(activity):
         'fee': activity.fee,
         'image_url': activity.image_url,
         'location': activity.location,
+        'status': activity.status
     }
 
 def activities_reg_to_dict(activities_reg):
     return {
         'id': activities_reg.activity.id,
         'name': activities_reg.activity.name,
-        'event_date': activities_reg.activity.event_date
+        'event_date': activities_reg.activity.event_date,
+        'status': activities_reg.activity.status
     }
 
 # 取消報名
