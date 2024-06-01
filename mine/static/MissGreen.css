@@ -97,3 +97,41 @@ footer {
   text-decoration: none;
   color: black;
 }
+.member-login-icon:link,
+.member-login-icon:visited,
+.member-login-icon:hover,
+.member-login-icon:active{
+  text-decoration: none;
+  /*text-align: center;*/
+  color: #000000;
+  font-size: medium;
+  outline: none;
+  border: none;
+}
+.activity_member table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: medium;
+}
+
+.activity_member th, .activity_member td {
+  padding: 8px;
+}
+
+.activity_member th {
+  background-color: #727d6b;
+  color: white;
+  font-weight: 500;
+}
+
+.activity_member th:first-child, .activity_member td:first-child {
+  width: 40%; /* 调整第一列的宽度 */
+}
+
+.activity_member th:nth-child(2), .activity_member td:nth-child(2) {
+  width: 30%; /* 调整第二列的宽度 */
+}
+
+.activity_member th:nth-child(3), .activity_member td:nth-child(3) {
+  width: 30%; /* 调整第三列的宽度 */
+}

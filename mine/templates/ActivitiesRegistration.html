@@ -493,7 +493,7 @@
         </div>
       </div>
     </div>
-    <script>
+    <script> 
         window.onload = function() {
             const activities = {{ activities | tojson }};
             function countdown(eventDate, elementId) {
@@ -550,7 +550,6 @@
             document.getElementById('modalActivityFee').textContent = fee;
             document.getElementById('modalActivityDescription').textContent = description;
         }
-
         // 在全局作用域中定义 saveActivity 函数
         function saveActivity() {
             // 取得表单数据

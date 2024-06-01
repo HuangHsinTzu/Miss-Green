@@ -459,7 +459,15 @@ def activityDetail():
     if activity_id:
         activity = Activity.query.filter_by(id =activity_id).first()
         if activity:
-            return render_template('ActivityDetail.html', activity=activity)
+            # 从 activities_reg_rec 表中检索具有特定 activity_id 的数据
+            try:
+                activity_reg_data = Activities_reg_rec.query.filter_by(activity_id=activity_id).all()
+                print(activity_reg_data)
+                return render_template('ActivityDetail.html', activity=activity, activity_reg_data=activity_reg_data)
+            except IntegrityError as e:
+                db.session.rollback()
+                print(f"Database error: {str(e)}")
+                return "An error occurred while querying the database", 500
     return "Activity not found", 404
 
 #活動報名
