@@ -392,7 +392,7 @@ def get_activity_detail():
     activity_data = {
         'id': activity.id,
         'name': activity.name,
-        'event_date': activity.event_date,
+        'event_date': activity.event_date.strftime('%Y/%m/%d'),
         'location': activity.location,
         'fee': activity.fee,
         'description': activity.description,
