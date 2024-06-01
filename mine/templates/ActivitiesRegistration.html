@@ -609,7 +609,7 @@
                           button.setAttribute('disabled', 'disabled');
                           button.removeAttribute('onclick');
                           button.removeAttribute('data-bs-target');
-                          console.log("11111");
+                          button.style.pointerEvents = 'none'; // 取消悬停时的光标变为指针
                       }
                   }
                   
