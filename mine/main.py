@@ -47,10 +47,11 @@ migrate = Migrate(app, db)
 def home():
     user_id = session.get('user_id')
     if user_id:
+        is_logged_in = 'user_id' in session
         identity = session.get('identity')
         if identity == 'user':
             latest_products = Product.query.filter(Product.quantity > 0).order_by(Product.id.desc()).limit(8).all()
-            return render_template('Index.html', latest_products=latest_products)
+            return render_template('Index.html', latest_products=latest_products, is_logged_in=is_logged_in)
         elif identity == 'farmer':
             return redirect(url_for('sellerHome'))
     else:
@@ -66,9 +67,9 @@ def sellerHome():
 #登入頁面
 @app.route('/login',methods=['GET','POST'])
 def login():
+    is_logged_in = 'user_id' in session
     form = LoginForm()
-    error_message = ''
-
+    print(is_logged_in)
     try:
         if form.validate_on_submit():
             if form.identity.data == 'user':
@@ -78,12 +79,12 @@ def login():
                     session['user_id'] = user.id
                     session['identity'] = 'user'
                     flash('您已經成功的登入系統')
-                    next = request.args.get('next', url_for('home'))
-                    return redirect(next)
+                    next_page = request.args.get('next')  # 获取 next 参数
+                    return redirect(next_page or url_for('home')) 
                 else:
-                    error_message = '(密碼錯誤)'
+                    flash('密碼錯誤')
                     if not user:
-                        error_message = '(尚未註冊!請先註冊)'
+                         flash('尚未註冊!請先註冊')
             elif form.identity.data == 'farmer':
                 farmer = Farmer.query.filter_by(email=form.email.data).first()
                 if farmer and farmer.check_password(form.password.data):
@@ -94,16 +95,16 @@ def login():
                     next = request.args.get('next', url_for('sellerHome'))
                     return redirect(next)
                 else:
-                    error_message = '(密碼錯誤)'
+                    flash('密碼錯誤')
                     if not farmer:
-                        error_message = '(尚未註冊!請先註冊)'
+                        flash('尚未註冊!請先註冊')
             else:
-                error_message = '(尚未註冊!請先註冊)'
+                flash('尚未註冊!請先註冊')
     except Exception as e:
-        error_message = f'發生錯誤: {str(e)}'
-        return redirect(url_for('error', message=error_message))
+        flash(f'發生錯誤: {str(e)}')
+        return redirect(url_for('error', message=f'發生錯誤: {str(e)}'))
 
-    return render_template('Login.html', form=form, error_message=error_message)
+    return render_template('Login.html', form=form, is_logged_in=is_logged_in)
 
 
 # 登出(沒頁面，但仍需路由/logout提供給登出使用)
@@ -118,15 +119,16 @@ def logout():
 # 會員頁面
 @app.route('/Member')
 def showMember():
+    is_logged_in = 'user_id' in session
     user_id = current_user.get_id()
     member = User.query.get(user_id)  # 從資料庫中獲取該會員的資訊
-    return render_template('Member.html', name=member.username, phone=member.phone, email=member.email)
+    return render_template('Member.html', name=member.username, phone=member.phone, email=member.email, is_logged_in=is_logged_in)
 
 #註冊
 @app.route('/Signup',methods=['GET','POST']) #POST接收RegistrationForm表單的資料
 def signup():
+    is_logged_in = 'user_id' in session
     form = RegistrationForm()
-    error_message = ''
 
     if form.validate_on_submit():
         try:
@@ -156,17 +158,18 @@ def signup():
                 next = url_for('login')
             return redirect(next)
         except ValidationError as e:
-            error_message = str(e)
-    return render_template('Signup.html',form=form, error_message=error_message)
+            flash(str(e))
+    return render_template('Signup.html',form=form, is_logged_in=is_logged_in)
 
 # 商品
 @app.route('/Items')
 def showProducts():
+    is_logged_in = 'user_id' in session
     # 從資料庫中取得所有商品
     products = Product.query.filter(Product.quantity > 0).all()
     #將products轉為字典
     products_dict = [product_to_dict(product) for product in products]
-    return render_template('Items.html', products=products_dict)
+    return render_template('Items.html', products=products_dict, is_logged_in=is_logged_in)
 
 #將products轉為字典
 def product_to_dict(product):
@@ -183,11 +186,12 @@ def product_to_dict(product):
 #呈現商品詳細資料
 @app.route('/ProductDetail', methods=['GET'])
 def ProductDetail():
+    is_logged_in = 'user_id' in session
     product_id = request.args.get('product_id')
     if product_id:
         product = Product.query.filter_by(id =product_id).first()
         if product:
-            return render_template('ProductDetail.html', product=product)
+            return render_template('ProductDetail.html', product=product, is_logged_in=is_logged_in)
     return "Product not found", 404
 
 
@@ -579,6 +583,10 @@ def cancel_registration():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('error.html', message="Page not found: 404"), 404
+
+@app.route('/Checkout', methods=['GET', 'POST'])
+def checkout():
+    return render_template('CheckOut.html')
 
 
 # 啟動app
