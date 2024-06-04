@@ -512,7 +512,7 @@
           console.log(details.quantity);
           const productTotal = details.price * details.quantity;
           const productInfoDiv = document.createElement("div");
-          productInfoDiv.textContent = `${product} * ${
+          productInfoDiv.textContent = `${details.productName} * ${
             details.quantity
           } - NT$${productTotal.toFixed(2)}`;
           offcanvasBody.appendChild(productInfoDiv);
@@ -543,7 +543,9 @@
 
       function isLoggedIn() {
         // 检查是否存在名为 "user_id" 的 session
-        return "{{ is_logged_in }}";
+        var loggedIn = "{{ is_logged_in }}" === "True"; // 将模板变量解析为布尔值
+        console.log(loggedIn);
+        return loggedIn;
       }
     </script>
 

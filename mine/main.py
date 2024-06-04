@@ -48,6 +48,7 @@ def home():
     user_id = session.get('user_id')
     if user_id:
         is_logged_in = 'user_id' in session
+        print(is_logged_in)
         identity = session.get('identity')
         if identity == 'user':
             latest_products = Product.query.filter(Product.quantity > 0).order_by(Product.id.desc()).limit(8).all()
@@ -67,6 +68,7 @@ def sellerHome():
 #登入頁面
 @app.route('/login',methods=['GET','POST'])
 def login():
+    user_id = session.get('user_id')
     is_logged_in = 'user_id' in session
     form = LoginForm()
     print(is_logged_in)
@@ -79,8 +81,10 @@ def login():
                     session['user_id'] = user.id
                     session['identity'] = 'user'
                     flash('您已經成功的登入系統')
-                    next_page = request.args.get('next')  # 获取 next 参数
-                    return redirect(next_page or url_for('home')) 
+                    is_logged_in = 'user_id' in session
+                    print(is_logged_in)
+                    next = request.args.get('next', url_for('home'))
+                    return redirect(next)
                 else:
                     flash('密碼錯誤')
                     if not user:
@@ -187,6 +191,7 @@ def product_to_dict(product):
 @app.route('/ProductDetail', methods=['GET'])
 def ProductDetail():
     is_logged_in = 'user_id' in session
+    print(is_logged_in)
     product_id = request.args.get('product_id')
     if product_id:
         product = Product.query.filter_by(id =product_id).first()
