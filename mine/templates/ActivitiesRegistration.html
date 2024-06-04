@@ -686,25 +686,6 @@
           const modalInstance = bootstrap.Modal.getInstance(modal);
           modalInstance.hide();
       }
-  
-                }
-              })
-              .then((data) => {
-                console.log("成功提交:", data);
-                alert("報名成功")
-                // 清空表单字段
-                document.getElementById("activityForm").reset();
-              })
-              .catch((error) => {
-                console.error("Error:", error);
-                alert("報名活動失敗");
-              });
-            // 关闭模态框
-            const modal = document.getElementById("editModal");
-            const modalInstance = bootstrap.Modal.getInstance(modal);
-            modalInstance.hide();
-        }
-
       // 页面加载时更新购物车显示
       document.addEventListener("DOMContentLoaded", function () {
         const cart = getCartFromCookies(); // 从 Cookie 中获取购物车数据
