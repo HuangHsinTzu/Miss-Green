@@ -327,7 +327,7 @@
     aria-labelledby="offcanvasExampleLabel"
   >
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasExampleLabel">購物車內容：</h5>
+      <h5 class="offcanvas-title" id="offcanvasExampleLabel">您的購物車內容：</h5>
       <button
         type="button"
         class="btn-close"
@@ -498,6 +498,7 @@
       }
 
       // 页面加载时更新购物车显示
+      // 页面加载时更新购物车显示
       document.addEventListener("DOMContentLoaded", function () {
         const cart = getCartFromCookies(); // 从 Cookie 中获取购物车数据
         updateCartUI(cart); // 更新购物车显示
@@ -526,7 +527,7 @@
           console.log(details.quantity);
           const productTotal = details.price * details.quantity;
           const productInfoDiv = document.createElement("div");
-          productInfoDiv.textContent = `${product} * ${
+          productInfoDiv.textContent = `${details.productName} * ${
             details.quantity
           } - NT$${productTotal.toFixed(2)}`;
           offcanvasBody.appendChild(productInfoDiv);
@@ -557,7 +558,9 @@
 
       function isLoggedIn() {
         // 检查是否存在名为 "user_id" 的 session
-        return "{{ is_logged_in }}";
+        var loggedIn = "{{ is_logged_in }}" === "True"; // 将模板变量解析为布尔值
+        console.log(loggedIn);
+        return loggedIn;
       }
 
     </script>

@@ -22,19 +22,17 @@
       rel="stylesheet"
     />
     <style>
-<<<<<<< HEAD
       a {
         text-decoration: none;
         text-align: center;
         color: #000000;
         font-size: medium;
-=======
+      }
       .navbar-brand {
         color: #727d6b;
         font-weight: 1000;
         font-size: xx-large;
         font-family: "Sacramento", cursive;
->>>>>>> 81f809da11b75a3c2f30bb92e9faf8a5120c1642
       }
       .navbar-brand:hover {
         color: #727d6b;
@@ -47,7 +45,7 @@
         font-weight: 1000;
         font-size: xx-large;
         font-family: "Sacramento", cursive;
-      }      
+      }
       div.item-container {
         width: 100%;
         overflow: auto;
@@ -104,27 +102,6 @@
       .custom-icon-color {
         color: #9d9d78; /* Change the hex color code to your desired color */
       }
-<<<<<<< HEAD
-      .navbar-brand {
-        color: #727d6b;
-        font-weight: 1000;
-        font-size: xx-large;
-        font-family: "Sacramento", cursive;
-      }
-      .navbar-brand:hover {
-        color: #727d6b;
-        font-weight: 1000;
-        font-size: xx-large;
-        font-family: "Sacramento", cursive;
-      }
-      .navbar-brand:visited {
-        color: #727d6b;
-        font-weight: 1000;
-        font-size: xx-large;
-        font-family: "Sacramento", cursive;
-      }
-=======
->>>>>>> 81f809da11b75a3c2f30bb92e9faf8a5120c1642
     </style>
   </head>
   <body>
@@ -498,7 +475,7 @@
           console.log(details.quantity);
           const productTotal = details.price * details.quantity;
           const productInfoDiv = document.createElement("div");
-          productInfoDiv.textContent = `${product} * ${
+          productInfoDiv.textContent = `${details.productName} * ${
             details.quantity
           } - NT$${productTotal.toFixed(2)}`;
           offcanvasBody.appendChild(productInfoDiv);
@@ -520,7 +497,7 @@
           if (!isLoggedIn()) {
             alert("請先登入再結帳！");
             // 这里可以跳转到登录页面
-            window.location.href = "/login?next=/Checkout";
+            window.location.href = "/login";
           } else {
             // 跳转到结账页面或执行结账操作
             window.location.href = "/Checkout";
@@ -529,7 +506,9 @@
 
       function isLoggedIn() {
         // 检查是否存在名为 "user_id" 的 session
-        return "{{ is_logged_in }}";
+        var loggedIn = "{{ is_logged_in }}" === "True"; // 将模板变量解析为布尔值
+        console.log(loggedIn);
+        return loggedIn;
       }
     </script>
   </body>

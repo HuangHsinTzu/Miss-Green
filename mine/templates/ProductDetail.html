@@ -81,7 +81,7 @@
       .scroll-body {
         overflow: auto; /* 设置为 auto 或 scroll 以便在内容溢出时显示滚动条 */
       }
-      .inCart-buyNow {
+      .inCart_buyNow {
         color: white;
         background-color: #727d6b;
         cursor: pointer;
@@ -283,9 +283,10 @@
       <div class="scroll-body">
         <div id="offcanvas-body"></div>
         <div
-          class="inCart-buyNow"
+          class="inCart_buyNow"
           id="checkout-button"
           style="margin: 20px; padding: 10px"
+          onclick="onlyLoggedIn();"
         >
           結帳
         </div>
@@ -329,9 +330,7 @@
           >
             加入購物車
           </div>
-          <div class="buy-now" onclick="window.location.href='加入购物车链接';">
-            直接購買
-          </div>
+          <div class="buy-now" onclick="buyNow();">直接購買</div>
         </div>
       </div>
     </div>
@@ -461,6 +460,8 @@
         document.querySelector(".inventory").textContent.split("：")[1]
       );
       console.log(availableQuantity);
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get("product_id");
 
       // 获取商品价格
       const price = parseFloat(
@@ -475,20 +476,21 @@
       let cart = getCartFromCookies();
       // 检查购物车中已有的商品数量加上要购买的数量是否超过库存数量
       if (
-        cart[productName] &&
-        cart[productName].quantity + currentQuantity > availableQuantity
+        cart[productId] &&
+        cart[productId].quantity + currentQuantity > availableQuantity
       ) {
-        alert("商品數量不足！無法加入購物車~");
+        alert("商品數量不足或購物車已有商品！無法加入購物車~");
         return; // 停止执行后续代码
       }
 
       console.log(cart);
       // 如果购物车中已有该商品，更新数量；否则新增商品
-      if (cart[productName]) {
-        cart[productName].quantity += currentQuantity;
-        cart[productName].price = price;
+      if (cart[productId]) {
+        cart[productId].quantity += currentQuantity;
+        cart[productId].price = price;
       } else {
-        cart[productName] = {
+        cart[productId] = {
+          productName: productName,
           quantity: currentQuantity,
           price: price,
         };
@@ -510,7 +512,7 @@
         console.log(details.quantity);
         const productTotal = details.price * details.quantity;
         const productInfoDiv = document.createElement("div");
-        productInfoDiv.textContent = `${product} * ${
+        productInfoDiv.textContent = `${details.productName} * ${
           details.quantity
         } - NT$${productTotal.toFixed(2)}`;
         offcanvasBody.appendChild(productInfoDiv);
@@ -526,29 +528,24 @@
       offcanvasBody.appendChild(totalPriceDiv);
     }
 
-    document
-      .getElementById("checkout-button")
-      .addEventListener("click", function () {
-        if (!isLoggedIn()) {
-          alert("請先登入再結帳！");
-          // 这里可以跳转到登录页面
-          window.location.href = "/login";
-        } else {
-          // 跳转到结账页面或执行结账操作
-          window.location.href = "/Checkout";
-        }
-      });
+    function onlyLoggedIn() {
+      if (!isLoggedIn()) {
+        alert("請先登入再結帳！");
+        // 这里可以跳转到登录页面
+        window.location.href = "/login";
+      } else {
+        // 跳转到结账页面或执行结账操作
+        window.location.href = "/Checkout";
+      }
+    }
 
     function isLoggedIn() {
       // 检查是否存在名为 "user_id" 的 session
-      return "{{ is_logged_in }}";
+      console.log("{{ is_logged_in }}");
+      var loggedIn = "{{ is_logged_in }}" === "True"; // 将模板变量解析为布尔值
+      console.log(loggedIn);
+      return loggedIn;
     }
-
-    // 页面加载时更新购物车显示
-    //document.addEventListener("DOMContentLoaded", function () {
-    //const cart = getCartFromCookies();
-    //updateCartUI(cart);
-    //});
 
     //清空cookie
     function clearCartCookies() {
@@ -574,33 +571,50 @@
       console.log("After setting cookie:", document.cookie); // 添加调试语句
     }
 
-    // 获取 "buy-now" 元素
-    const buyNowElement = document.querySelector(".inCart-buyNow");
+    function buyNow() {
+      const productName =
+        document.querySelector(".product-detail h1").textContent;
+      console.log(productName);
+      const quantityInput = document.getElementById("quantity_1");
+      let currentQuantity = parseInt(quantityInput.value);
+      const availableQuantity = parseInt(
+        document.querySelector(".inventory").textContent.split("：")[1]
+      );
+      console.log(availableQuantity);
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get("product_id");
 
-    // 为 "buy-now" 元素添加点击事件监听器
-    buyNowElement.addEventListener("click", function () {
-      console.log("function executed");
-      // 从本地存储中获取 cartData 数据
-      const cartData = JSON.parse(localStorage.getItem("cartData"));
+      // 获取商品价格
+      const price = parseFloat(
+        document
+          .querySelector(".product-detail h5")
+          .textContent.replace("NT$", "")
+          .trim()
+      );
+      console.log(price);
 
-      // 检查 cartData 是否存在
-      if (cartData) {
-        // 将 cartData 数据格式化为字符串
-        const cartDataString = JSON.stringify(cartData, null, 2);
+      // 获取现有的购物车数据
+      let cart = getCartFromCookies();
+      // 检查购物车中已有的商品数量加上要购买的数量是否超过库存数量
 
-        // 使用 alert 弹出对话框显示 cartData 数据
-        alert(`${cartDataString}`);
-
-        // 在用户点击 OK 按钮后清空 cartData 数据
-        localStorage.removeItem("cartData");
-        // 清空 offcanvas-body 内容
-        const offcanvasBody = document.getElementById("offcanvas-body");
-        offcanvasBody.innerHTML = "";
+      console.log(cart);
+      // 如果购物车中已有该商品，更新数量；否则新增商品
+      if (cart[productId]) {
+        cart[productId].quantity += currentQuantity;
+        cart[productId].price = price;
       } else {
-        // 如果 cartData 不存在，弹出相应信息
-        alert("CartData is empty.");
+        cart[productId] = {
+          productName: productName,
+          quantity: currentQuantity,
+          price: price,
+        };
       }
-    });
+
+      // 更新购物车到cookie
+      setCartToCookies(cart);
+      updateCartUI(cart);
+      onlyLoggedIn();
+    }
   </script>
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
