@@ -672,7 +672,6 @@
                   return response.json();
               } else {
                   throw new Error("報名活動失敗");
-<<<<<<< HEAD
                 }
               })
               .then((data) => {
@@ -753,25 +752,6 @@
         // 检查是否存在名为 "user_id" 的 session
         return "{{ is_logged_in }}";
       }
-    </script>
-=======
-              }
-          })
-          .then((data) => {
-              console.log("成功提交:", data);
-              alert("報名成功")
-              document.getElementById("activityForm").reset();
-          })
-          .catch((error) => {
-              console.error("Error:", error);
-              alert("報名活動失敗");
-          });
-  
-          const modal = document.getElementById("editModal");
-          const modalInstance = bootstrap.Modal.getInstance(modal);
-          modalInstance.hide();
-      }
-  
       function cancelCancel() {
           currentId = null;
           console.log(currentId);
@@ -806,7 +786,6 @@
       }
   </script>
   
->>>>>>> 81f809da11b75a3c2f30bb92e9faf8a5120c1642
     <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
