@@ -167,3 +167,17 @@ footer {
 .cancel-register-button {
   width: 30%; /* 30%的宽度 */
 }
+.cancelBtn{
+  border: none;
+  border-radius: 0.5rem;
+  padding: 5px;
+  width: 90px;
+  background-color: #d9b300;
+  color: black;
+  font-weight: 700;
+  font-size: medium;
+}
+.card{
+  margin-right: 80px;
+}
+
