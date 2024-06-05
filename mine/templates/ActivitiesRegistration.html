@@ -215,6 +215,10 @@
         margin-bottom: 1rem; /* Ensure spacing between rows */
         margin-left: 1rem;
       }
+      .registered-btn {
+        background-color: gray;
+        color: white;
+      }
     </style>
   </head>
   <body>
@@ -416,6 +420,7 @@
         <thead>
             <tr>
                 <th class="activity-name">活動名稱</th>
+                <th class="countdown">活動地點</th>
                 <th class="event-date">活動日期</th>
                 <th class="countdown">距離活動剩下</th>
                 <th class="cancel-register-button"></th>
@@ -425,6 +430,7 @@
             {% for activity in user_activities %}
             <tr data-id="{{ activity.id }}">
                 <td>{{ activity.name }}</td>
+                <td>{{ activity.location }}</td>
                 <td>{{ activity.event_date }}</td>
                 <td><div id="countdown-{{ loop.index }}"></div></td>
                 {% if activity.status == "已取消" %}
@@ -434,6 +440,20 @@
                 {% endif %}
                 <script>
                     countdown("{{ activity.event_date }}", "countdown-{{ loop.index }}");
+                    function countdown(eventDate, elementId) {
+                      const countDownDate = new Date(eventDate).getTime();
+                      const x = setInterval(function() {
+                          const now = new Date().getTime();
+                          const distance = countDownDate - now;
+                          const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                          document.getElementById(elementId).innerHTML = days + "d " + hours + "h ";
+                          if (distance < 0) {
+                              clearInterval(x);
+                              document.getElementById(elementId).innerHTML = "EXPIRED";
+                          }
+                      }, 1000);
+                  }
                 </script>
             </tr>
             {% endfor %}
@@ -562,34 +582,20 @@
       var currentId = null;
       window.onload = function() {
           const activities = {{ activities | tojson }};
-          
-          function countdown(eventDate, elementId) {
-              const countDownDate = new Date(eventDate).getTime();
-              const x = setInterval(function() {
-                  const now = new Date().getTime();
-                  const distance = countDownDate - now;
-                  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                  document.getElementById(elementId).innerHTML = days + "d " + hours + "h ";
-                  if (distance < 0) {
-                      clearInterval(x);
-                      document.getElementById(elementId).innerHTML = "EXPIRED";
-                  }
-              }, 1000);
-          }
-  
-          function displayActivities(activities) {
+
+          function displayActivities(activities, userActivities) {
               const cardContainer = document.getElementById('cardContainer');
               console.log(activities);
               activities.forEach(activity => {
+                  if (activity.status === "已取消") {
+                      return; // 如果活動已取消，跳過生成卡片
+                  }
                   const card = document.createElement('div');
                   card.classList.add('card', 'col');
                   card.style.width = '18rem';
-                  
+                  // 检查该活动是否在用户已报名的活动中
+                  const isRegistered = userActivities.some(userActivity => userActivity.id === activity.id);
                   // 添加条件以检查活动状态
-                  if (activity.status === "已取消") {
-                      card.style.opacity = '0.5'; // 设置透明度为0.5
-                  }
                   
                   card.innerHTML = `
                       <div class="card-img-container">
@@ -598,26 +604,27 @@
                       <div class="card-body">
                           <h5 class="card-title">${activity.name}</h5>
                           <p class="card-text">${activity.event_date}</p>
-                          <a href="#" class="btn register-btn" data-bs-toggle="modal" data-bs-target="#editModal" onclick="setActivityIdAndInfo('${activity.id}', '${activity.name}', '${activity.event_date}', '${activity.location}', '${activity.fee}', '${activity.description}')">報名活動</a>
+                          <a href="#" class="btn register-btn ${isRegistered ? 'registered-btn' : ''}" data-bs-target="#editModal" onclick="setActivityIdAndInfo('${activity.id}', '${activity.name}', '${activity.event_date}', '${activity.location}', '${activity.fee}', '${activity.description}')">報名活動</a>
                       </div>
                   `;
                   
                   // 添加到 DOM 前先查找按钮并设置其禁用属性
-                  if (activity.status === "已取消") {
-                      const button = card.querySelector('.register-btn');
+                  const button = card.querySelector('.register-btn');
+                  if (isRegistered) {
                       if (button) {
                           button.setAttribute('disabled', 'disabled');
+                          button.style.pointerEvents = 'none'; // 取消悬停时的光标变为指针
                           button.removeAttribute('onclick');
                           button.removeAttribute('data-bs-target');
-                          button.style.pointerEvents = 'none'; // 取消悬停时的光标变为指针
+                          button.textContent = isRegistered ? '已報名' : '已取消';
                       }
                   }
                   
                   cardContainer.appendChild(card);
               });
           }
-
-          displayActivities(activities);
+          const userActivities = {{ user_activities | tojson }};
+          displayActivities(activities, userActivities);
   
           document.querySelectorAll(".cancelBtn").forEach((button) => {
               button.addEventListener("click", function () {
@@ -686,7 +693,68 @@
           const modalInstance = bootstrap.Modal.getInstance(modal);
           modalInstance.hide();
       }
-  
+      // 页面加载时更新购物车显示
+      document.addEventListener("DOMContentLoaded", function () {
+        const cart = getCartFromCookies(); // 从 Cookie 中获取购物车数据
+        updateCartUI(cart); // 更新购物车显示
+      });
+
+      // 定义函数：从Cookies中获取购物车数据
+      function getCartFromCookies() {
+        const cartCookie = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("cart="));
+        if (cartCookie) {
+          return JSON.parse(cartCookie.split("=")[1]);
+        } else {
+          return {};
+        }
+      }
+
+      // 定义函数：更新购物车UI显示
+      function updateCartUI(cart) {
+        const offcanvasBody = document.getElementById("offcanvas-body");
+        offcanvasBody.innerHTML = ""; // 清空当前购物车显示内容
+        let totalPrice = 0; // 初始化总价为0
+
+        for (const [product, details] of Object.entries(cart)) {
+          console.log(details.price);
+          console.log(details.quantity);
+          const productTotal = details.price * details.quantity;
+          const productInfoDiv = document.createElement("div");
+          productInfoDiv.textContent = `${product} * ${
+            details.quantity
+          } - NT$${productTotal.toFixed(2)}`;
+          offcanvasBody.appendChild(productInfoDiv);
+
+          totalPrice += productTotal; // 累加总价
+        }
+
+        // 创建并添加总价显示
+        const totalPriceDiv = document.createElement("div");
+        totalPriceDiv.textContent = `總價: NT$${totalPrice.toFixed(2)}`;
+        totalPriceDiv.style.fontWeight = "bold";
+        totalPriceDiv.style.marginTop = "10px";
+        offcanvasBody.appendChild(totalPriceDiv);
+      }
+
+      document
+        .getElementById("checkout-button")
+        .addEventListener("click", function () {
+          if (!isLoggedIn()) {
+            alert("請先登入再結帳！");
+            // 这里可以跳转到登录页面
+            window.location.href = "/login";
+          } else {
+            // 跳转到结账页面或执行结账操作
+            window.location.href = "/Checkout";
+          }
+        });
+
+      function isLoggedIn() {
+        // 检查是否存在名为 "user_id" 的 session
+        return "{{ is_logged_in }}";
+      }
       function cancelCancel() {
           currentId = null;
           console.log(currentId);

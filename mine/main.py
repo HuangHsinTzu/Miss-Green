@@ -564,6 +564,7 @@ def activities_reg_to_dict(activities_reg):
         'id': activities_reg.activity.id,
         'name': activities_reg.activity.name,
         'event_date': activities_reg.activity.event_date,
+        'location': activities_reg.activity.location,
         'status': activities_reg.activity.status
     }
 
