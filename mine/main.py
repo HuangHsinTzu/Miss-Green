@@ -85,10 +85,11 @@ def login():
                     print(is_logged_in)
                     next = request.args.get('next', url_for('home'))
                     return redirect(next)
-                else:
-                    flash('密碼錯誤')
+                else:                    
                     if not user:
-                         flash('尚未註冊!請先註冊')
+                        flash('尚未註冊!請先註冊')
+                    else:
+                        flash('密碼錯誤')
             elif form.identity.data == 'farmer':
                 farmer = Farmer.query.filter_by(email=form.email.data).first()
                 if farmer and farmer.check_password(form.password.data):
@@ -589,10 +590,70 @@ def cancel_registration():
 def page_not_found(e):
     return render_template('error.html', message="Page not found: 404"), 404
 
+#添加商品到購物車
+@app.route('/SaveCart', methods=['POST'])
+def save_cart():
+    data = request.get_json()
+    product_ids = data.get('product_ids')
+    buyer_id = current_user.get_id()  # 假设有一个函数可以获取当前用户的 ID
+
+    if not product_ids:
+        return jsonify({'success': False, 'message': 'No products in cart'})
+
+    # 查找或创建购物车
+    cart = ShoppingCart.query.filter_by(buyer_id=buyer_id).first()
+    if not cart:
+        cart = ShoppingCart(buyer_id=buyer_id)
+        db.session.add(cart)
+
+    # 清除当前购物车的所有商品
+    cart.clear_cart()
+
+    # 添加所有商品到购物车
+    for product_id in product_ids:
+        cart.add_item(product_id)
+
+    return jsonify({'success': True, 'message': 'Cart saved successfully'})
+
+#移除購物車商品
+@app.route('/RemoveFromCart', methods=['POST'])
+def remove_from_cart():
+    data = request.get_json()
+    product_id = data.get('product_id')
+
+    if not product_id:
+        return jsonify({'success': False, 'message': 'Product ID is required'})
+
+    buyer_id = current_user.get_id()
+    cart = ShoppingCart.query.filter_by(buyer_id=buyer_id).first()
+
+    if cart and cart.remove_item(product_id):
+        return jsonify({'success': True, 'message': 'Product removed from cart'})
+    else:
+        return jsonify({'success': False, 'message': 'Product not found in cart'})
+
+
+#呈現使用者購物車內容
 @app.route('/Checkout', methods=['GET', 'POST'])
 def checkout():
-    return render_template('CheckOut.html')
+    user_id = current_user.get_id()
+    shopping_cart = ShoppingCart.query.filter_by(buyer_id=user_id).first()
+    if shopping_cart:
+        # 获取购物车中的所有商品
+        cart_items = shopping_cart.items
+        cart_items_dict = [item_to_dict(item) for item in cart_items ]
+    else:
+        cart_items_dict = []
 
+    return render_template('CheckOut.html', items=cart_items_dict)
+
+def item_to_dict(item):
+    return{
+        'id':item.id,
+        'name':item.name,
+        'price':item.price,
+        'quantity':item.quantity,
+    }
 
 # 啟動app
 if __name__ == "__main__":
