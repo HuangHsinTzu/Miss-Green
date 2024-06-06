@@ -451,6 +451,7 @@
     });
 
     function addToCart() {
+      //clearCartCookies();
       const productName =
         document.querySelector(".product-detail h1").textContent;
       console.log(productName);
@@ -490,6 +491,7 @@
         cart[productId].price = price;
       } else {
         cart[productId] = {
+          productId: productId,
           productName: productName,
           quantity: currentQuantity,
           price: price,
@@ -567,7 +569,7 @@
     // 定义函数：将购物车数据设置到Cookies中
     function setCartToCookies(cart) {
       console.log("Before setting cookie:", cart); // 添加调试语句
-      document.cookie = `cart=${JSON.stringify(cart)};path=/;max-age=31536000`; // Cookie有效期1年
+      document.cookie = `cart=${JSON.stringify(cart)};path=/`; // Cookie有效期1年
       console.log("After setting cookie:", document.cookie); // 添加调试语句
     }
 

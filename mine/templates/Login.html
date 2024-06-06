@@ -335,16 +335,6 @@
   </div>
     <div class="parent-container">
       <div class="form-container">
-        <!-- 置中的白色 div 容器 -->
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <ul class="flash">
-            {% for message in messages %}
-                <li style="color:#143032">{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        {% endwith %}
         <div class="centered-div">
           <form method="POST" id="login-form" action={{ url_for('login') }} class="text">
           {{ form.hidden_tag() }}
