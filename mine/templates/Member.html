@@ -276,7 +276,7 @@
     >
       <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="offcanvasExampleLabel">
-          您的購物車內容：
+          今日加入的購物車內容：
         </h5>
         <button
           type="button"
@@ -311,6 +311,13 @@
         </thead>
         <tbody id="purchase-history-table-body">
           <!-- 購買紀錄會顯示在這裡 -->
+          {% for record in purchase_history %}
+          <tr>
+            <td>{{ record.order_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td>{{ record.product_name }} x {{ record.quantity }}</td>
+            <td>NT$ {{ record.total_price }}</td>
+          </tr>
+          {% endfor %}
         </tbody>
       </table>
     </div>
@@ -378,78 +385,6 @@
       crossorigin="anonymous"
     ></script>
     <script>
-      window.addEventListener("beforeunload", function () {
-        navigator.sendBeacon("/logout");
-      });
-      document.addEventListener("DOMContentLoaded", function () {
-        var popoverTriggerList = [].slice.call(
-          document.querySelectorAll('[data-bs-toggle="popover"]')
-        );
-        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-          return new bootstrap.Popover(popoverTriggerEl, {
-            html: true, // Enable HTML content in the popover
-          });
-        });
-      });
-      function loadPurchaseHistory() {
-        // 從本地存儲中獲取購買歷史記錄
-        const purchaseHistory =
-          JSON.parse(localStorage.getItem("purchaseHistory")) || [];
-
-        // 分組購買記錄
-        const groupedByDate = {};
-        purchaseHistory.forEach((order) => {
-          const date = order.purchaseDate;
-          if (!groupedByDate[date]) {
-            groupedByDate[date] = [];
-          }
-          groupedByDate[date].push(order);
-        });
-
-        // 获取表格的 tbody 元素
-        const tbody = document.querySelector("#purchase-history-table-body");
-
-        // 清空原有的表格內容
-        tbody.innerHTML = "";
-
-        // 遍歷分組，創建每個購買時間的行
-        for (const [date, orders] of Object.entries(groupedByDate)) {
-          // 創建表格行
-          const row = document.createElement("tr");
-
-          // 創建單元格
-          const dateTimeCell = document.createElement("td");
-          const purchasedContentCell = document.createElement("td");
-          const totalPriceCell = document.createElement("td");
-
-          // 初始化總價
-          let totalPrice = 0;
-
-          // 合併相同購買時間的所有訂單內容
-          orders.forEach((order) => {
-            totalPrice += order.Price;
-            purchasedContentCell.innerHTML += `${order.productName} * ${order.quantity}，小計: $${order.Price}<br>`;
-          });
-
-          // 設置購買時間
-          dateTimeCell.textContent = date;
-
-          // 設置總價
-          totalPriceCell.textContent = `$${totalPrice}`;
-
-          // 添加單元格到行
-          row.appendChild(dateTimeCell);
-          row.appendChild(purchasedContentCell);
-          row.appendChild(totalPriceCell);
-
-          // 將行添加到表格的 tbody 中
-          tbody.appendChild(row);
-        }
-      }
-
-      // 在頁面加載時運行 loadPurchaseHistory 函數
-      document.addEventListener("DOMContentLoaded", loadPurchaseHistory);
-
       // 页面加载时更新购物车显示
       document.addEventListener("DOMContentLoaded", function () {
         const cart = getCartFromCookies(); // 从 Cookie 中获取购物车数据

@@ -284,7 +284,7 @@
     >
       <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="offcanvasExampleLabel">
-          今日加入購物車內容：
+          今日加入的購物車內容：
         </h5>
         <button
           type="button"
@@ -332,12 +332,12 @@
           <input type="text" id="address" name="address" required /><br />
 
           <label for="payment-method">付款方式:</label>
-          <select id="payment-method" name="payment-method" required>
+          <select id="payment_method" name="payment_method" required>
             <br />
-            <option value="credit-card">信用卡</option>
+            <option value="信用卡">信用卡</option>
             <br />
-            <option value="paypal">LinePay</option>
-            <option value="cash-on-delivery">貨到付款</option>
+            <option value="LinePay">LinePay</option>
+            <option value="貨到付款">貨到付款</option>
           </select>
 
           <button type="submit" class="Pay">結帳</button>
@@ -354,9 +354,7 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">
-                Miss Green
-              </h1>
+              <h1 class="modal-title fs-5" id="exampleModalLabel">確認購買</h1>
               <button
                 type="button"
                 class="btn-close"
@@ -364,7 +362,25 @@
                 aria-label="Close"
               ></button>
             </div>
-            <div class="modal-body">感謝您的購買，我們會盡快幫您出貨！</div>
+            <div class="modal-body">確定要購買目前所選商品嗎?</div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                id="confirmPurchase"
+                data-bs-dismiss="modal"
+                onclick="pay();"
+              >
+                确認
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -468,6 +484,7 @@
           const quantityCell = document.createElement("td");
           const quantityInput = document.createElement("input");
           quantityInput.type = "number";
+          quantityInput.classList.add("quantity-input");
           quantityInput.value = 1;
           quantityInput.min = 1;
           quantityInput.addEventListener("input", function () {
@@ -623,6 +640,7 @@
                 // 创建数量输入框
                 const quantityInput = document.createElement("input");
                 quantityInput.type = "number";
+                quantityInput.classList.add("quantity-input");
                 quantityInput.value = details.quantity;
                 quantityInput.min = 1;
                 quantityInput.addEventListener("input", function () {
@@ -757,7 +775,7 @@
                   if (data.success) {
                     alert("您的購物車已更新");
                   } else {
-                    alert("儲存購物車失敗");
+                    alert("購物車無商品");
                   }
                 })
                 .catch((error) => {
@@ -804,9 +822,60 @@
               document.cookie = `cart=${cartJSON}; path=/`;
             }
 
+            function pay(){
+
+              const selectedProducts = [];
+              document.querySelectorAll('.checkbox:checked').forEach(checkbox => {
+                  const row = checkbox.closest('tr');
+                  const productId = checkbox.getAttribute('product-id');
+                  const quantity = parseInt(row.querySelector('.quantity-input').value);
+                  selectedProducts.push({ product_id: productId, quantity: quantity });
+              });
+
+              const formData = {
+                name: document.getElementById('name').value,
+                address: document.getElementById('address').value,
+                payment_method: document.getElementById('payment_method').value,
+                selected_products: selectedProducts
+              };
+
+
+              fetch('/Pay', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  alert('感謝您的購買，我們會盡快幫您出貨！歡迎繼續購物');
+                  // 更新cookie中的购物车数据
+                  selectedProducts.forEach(item => {
+                    const productId = item.product_id;
+                    console.log(productId)
+                    const cart = getCartFromCookies();
+                    if (cart[productId]) {
+                      delete cart[productId];
+                    }
+                    setCartCookie(cart);
+                  });
+
+
+                  location.reload();
+                } else {
+                  let alertMessage = '購買失敗，以下商品庫存不足：\n';
+                  for (const [productId, details] of Object.entries(data.out_of_stock)) {
+                    alertMessage += `商品: ${details.name}, 剩餘庫存: ${details.stock}\n`;
+                  }
+                  alert(alertMessage);
+                  }
+              })
+              .catch(error => console.error('Error:', error));
+            }
+
             const form = document.getElementById("shipping-form");
-            // 選擇 "Pay" 按鈕
-            const payButton = document.querySelector(".Pay");
             // 選擇模態窗口
             let modal = new bootstrap.Modal(document.getElementById("exampleModal"));
 
@@ -821,6 +890,19 @@
               // 如果表單有效
               if (isValid) {
                 // 顯示模態窗口
+                const selectedProducts = [];
+                document.querySelectorAll('.checkbox:checked').forEach(checkbox => {
+                    const row = checkbox.closest('tr');
+                    const productId = checkbox.getAttribute('product-id');
+                    const quantity = parseInt(row.querySelector('.quantity-input').value);
+                    selectedProducts.push({ product_id: productId, quantity: quantity });
+                });
+
+                if (selectedProducts.length === 0) {
+                    alert('尚未選擇欲購買商品');
+                    return;
+                }
+
                 modal.show();
               } else {
                 // 如果表單無效，調用 `reportValidity()` 顯示錯誤
@@ -833,7 +915,7 @@
               localStorage.removeItem("cartData");
               console.log("购物车数据已清空");
             };*/
-            document.addEventListener("DOMContentLoaded", function () {
+            /*document.addEventListener("DOMContentLoaded", function () {
               // 获取 modal 元素
               const modal = document.getElementById("exampleModal");
               // 如果 modal 不为空，则添加事件监听器
@@ -846,91 +928,7 @@
               } else {
                 console.error("未找到 ID 为 'exampleModal' 的 modal 元素");
               }
-            });
-
-            function clearContents() {
-              // 从 localStorage 中获取 cartData
-              const cartData = JSON.parse(localStorage.getItem("cartData"));
-
-              // 获取当前日期和时间
-              const currentDate = new Date();
-              const formattedDate = currentDate.toLocaleString(); // 以本地化格式获取日期和时间
-
-              // 清空表格主体的内容
-              const tableBody = document.querySelector("#cart-table tbody");
-              if (tableBody) {
-                tableBody.innerHTML = "";
-                console.log("表格主体的内容已清空");
-              }
-
-              // 清空 offcanvas-body 的内容
-              const offcanvasBody = document.getElementById("offcanvas-body");
-              if (offcanvasBody) {
-                offcanvasBody.innerHTML = "";
-                console.log("offcanvas-body 已清空");
-              }
-
-              // 将总价归零
-              const totalPriceElement = document.querySelector(".totalCostOnPage");
-              if (totalPriceElement) {
-                totalPriceElement.textContent = "總價: $0";
-                console.log("总价已重置为 0");
-              }
-
-              // 清空 shipping-form 表单中的输入字段
-              const shippingForm = document.getElementById("shipping-form");
-              if (shippingForm) {
-                const inputs = shippingForm.querySelectorAll("input");
-                inputs.forEach((input) => {
-                  input.value = ""; // 将 input 的值设置为空字符串
-                });
-                console.log("shipping-form 表单中的输入字段已清空");
-              }
-
-              // 从 localStorage 中获取现有的购买记录数据
-              let purchaseHistory =
-                JSON.parse(localStorage.getItem("purchaseHistory")) || [];
-
-              // 如果 cartData 存在且不为空，将购物车内容添加到购买记录中
-              if (cartData && cartData.length > 0) {
-                // 为每个购物车项添加当前日期和时间
-                const cartDataWithDate = cartData.map((item) => {
-                  return {
-                    ...item,
-                    purchaseDate: formattedDate, // 添加购买日期和时间
-                  };
-                });
-
-                // 将购物车内容添加到购买记录中
-                purchaseHistory.push(...cartDataWithDate);
-                console.log("购物车内容已添加到购买记录");
-
-                // 清空 cartData 数据
-                localStorage.removeItem("cartData");
-                console.log("cartData 已清空");
-              }
-
-              // 将更新后的购买记录保存回 localStorage
-              localStorage.setItem(
-                "purchaseHistory",
-                JSON.stringify(purchaseHistory)
-              );
-              console.log("购买记录已保存到 purchaseHistory");
-
-              // 跳转到购买记录页面
-              window.location.href = "PurchaseHistory.html";
-            }
-
-            // 清空购物车数据
-            const clearCart = () => {
-              document.cookie.split(";").forEach((cookie) => {
-                const name = cookie.split("=")[0].trim();
-                if (name.startsWith("cartItem_")) {
-                  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-                }
-              });
-              console.log("购物车数据已清空");
-            };
+            });*/
     </script>
   </body>
 </html>
