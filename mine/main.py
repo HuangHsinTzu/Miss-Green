@@ -176,6 +176,25 @@ def showProducts():
     products_dict = [product_to_dict(product) for product in products]
     return render_template('Items.html', products=products_dict, is_logged_in=is_logged_in)
 
+# 商品搜尋路由
+@app.route('/search', methods=['GET'])
+def search():
+    query = request.args.get('query', '')  # 從 URL 參數中獲取搜尋關鍵字
+    if query:
+        # 使用 SQLAlchemy 查詢從資料庫中獲取符合搜尋關鍵字的商品
+        products = Product.query.filter(Product.name.like(f'%{query}%')).all()
+        # 將每個 Product 物件轉換為字典，並排除不需要的屬性
+        results = [
+            {key: getattr(product, key) for key in product.__dict__.keys() if not key.startswith('_')}
+            for product in products
+        ]
+    else:
+        results = []
+        print(results)
+
+    return render_template('SearchResults.html', query=query, results=results)
+
+
 #將products轉為字典
 def product_to_dict(product):
     return {

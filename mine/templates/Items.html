@@ -249,6 +249,19 @@
             </li>
           </ul>
         </div>
+        <div class="search">
+          <form class="d-flex" role="search" action="/search" method="get">
+            <input
+              class="form-control me-2"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+              name="query"
+            />
+            <button class="btn btn-outline-success" type="submit" onclick="window.location.href='/search-products'">Search</button>
+          </form>
+        </div>
+
         {% if current_user.is_authenticated %}
         <div class="dropdown">
           <a
