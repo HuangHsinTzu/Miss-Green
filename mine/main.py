@@ -4,7 +4,7 @@ from werkzeug.utils import escape, secure_filename
 from flask_login import login_user, logout_user, login_required, current_user
 from wtforms import ValidationError
 from flask import jsonify
-from sqlalchemy import update
+from sqlalchemy import update, or_
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 #import sqlite3
@@ -182,7 +182,9 @@ def search():
     query = request.args.get('query', '')  # 從 URL 參數中獲取搜尋關鍵字
     if query:
         # 使用 SQLAlchemy 查詢從資料庫中獲取符合搜尋關鍵字的商品
-        products = Product.query.filter(Product.name.like(f'%{query}%')).all()
+        products = Product.query.filter(
+            or_(Product.name.like(f'%{query}%'), Product.category.like(f'%{query}%'))
+        ).all()
         # 將每個 Product 物件轉換為字典，並排除不需要的屬性
         results = [
             {key: getattr(product, key) for key in product.__dict__.keys() if not key.startswith('_')}
