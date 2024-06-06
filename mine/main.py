@@ -96,8 +96,7 @@ def login():
     is_logged_in = 'user_id' in session
     form = LoginForm()
     print(is_logged_in)
-    try:
-        if form.validate_on_submit():
+    if form.validate_on_submit():
             if form.identity.data == 'user':
                 user = User.query.filter_by(email=form.email.data).first()
                 if user and user.check_password(form.password.data):
@@ -129,9 +128,6 @@ def login():
                         flash('尚未註冊!請先註冊')
             else:
                 flash('尚未註冊!請先註冊')
-    except Exception as e:
-        flash(f'發生錯誤: {str(e)}')
-        return redirect(url_for('error', message=f'發生錯誤: {str(e)}'))
 
     return render_template('Login.html', form=form, is_logged_in=is_logged_in)
 
