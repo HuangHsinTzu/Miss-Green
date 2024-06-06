@@ -31,9 +31,9 @@
       .centered-div {
         background-color: white; /* 白色背景 */
         width: 450px; /* 設定寬度 */
-        height: 760px; /* 設定高度 */
+        height: 1040px; /* 設定高度 */
         position: absolute; /* 使用絕對定位 */
-        margin-top: 500px;
+        margin-top: 400px;
         left: 50%; /* 水平居中 */
         transform: translate(-50%, -50%); /* 使容器居中 */
         padding: 20px; /* 增加內邊距 */
@@ -41,7 +41,13 @@
 
       .text {
         /* 您可以根據需求調整 text 的樣式 */
-        text-align: left; /* 左對齊文字 */
+        text-align: left;
+        margin-top: 140px; /* 左對齊文字 */
+      }
+      .text2 {
+        /* 您可以根據需求調整 text 的樣式 */
+        text-align: left;
+        margin-top: 30px; /* 左對齊文字 */
       }
       /* 設置輸入框樣式 */
       input[type="text1"],
@@ -89,14 +95,6 @@
         text-decoration: none;
         margin-left: 30px;
       }
-      .signup-button {
-        background-color: #727d6b;
-        border-radius: 5px;
-        color: white;
-        padding: 10px;
-        text-align: center;
-        margin: 30px;
-      }
       .login-button {
         background-color: #ffffff;
         border: 1px solid #727d6b;
@@ -121,9 +119,9 @@
       .form-container {
         background-color: transparent; /* 白色背景 */
         width: 450px; /* 設定寬度 */
-        height: 900px; /* 設定高度 */
+        height: 950px; /* 設定高度 */
         position: absolute; /* 使用絕對定位 */
-        margin-top: 400px;
+        margin-top: 500px;
         left: 50%; /* 水平居中 */
         transform: translate(-50%, -50%); /* 使容器居中 */
         flex: 1;
@@ -133,7 +131,25 @@
         height: auto; /* 自动调整父容器的高度 */
         display: flex;
         flex-direction: column; /* 子元素按列排列 */
-        min-height: 850px; /* 至少填满视口高度 */
+        min-height: 950px; /* 至少填满视口高度 */
+      }
+      .navbar-brand {
+        color: #727d6b;
+        font-weight: 1000;
+        font-size: xx-large;
+        font-family: "Sacramento", cursive;
+      }
+      .navbar-brand:hover {
+        color: #727d6b;
+        font-weight: 1000;
+        font-size: xx-large;
+        font-family: "Sacramento", cursive;
+      }
+      .navbar-brand:visited {
+        color: #727d6b;
+        font-weight: 1000;
+        font-size: xx-large;
+        font-family: "Sacramento", cursive;
       }
     </style>
   </head>
@@ -338,12 +354,12 @@
             <form method="POST" action={{ url_for('signup') }} class="text">
               {{ form.hidden_tag() }}
               <h2 style="font-weight: 900">註冊</h2>
-              <input type="text1" id="input-name" name="username" pattern="[a-zA-Z]+" title="只能使用英文字母~" placeholder="帳號名稱" required />
+              <input type="text1" id="input-name" name="username" pattern="[a-zA-Z]+" title="只能使用英文字母~" placeholder="帳號名稱（只能使用英文字母）" required />
               <input type="email" id="input-email" name="email" placeholder="電子信箱" title="請輸入有效電子信箱~" required/>
-              <input type="text1" id="input-pwd" name="password" pattern=".{8,}" title="請輸入至少8位數~" placeholder="密碼" required/>
-              <input type="text1" id="input-pwd2" name="pass_confirm" pattern=".{8,}" placeholder="確認密碼"required oninput="setCustomValidity('');" onchange="if(document.getElementById('input-pwd').value != document.getElementById('input-pwd2').value){setCustomValidity('密碼不吻合');}"/>
+              <input type="password" id="input-pwd" name="password" pattern=".{8,}" title="請輸入至少8位數~" placeholder="密碼" required/>
+              <input type="password" id="input-pwd2" name="pass_confirm" pattern=".{8,}" title="請確保與上方密碼吻合~" placeholder="確認密碼"required oninput="setCustomValidity('');" onchange="if(document.getElementById('input-pwd').value != document.getElementById('input-pwd2').value){setCustomValidity('密碼不吻合');}"/>
               <input type="tel" id="input-phone" name="phone" pattern="[0-9]{10}" placeholder="手機號碼" title="請輸入有效手機號碼~" required/>
-              <div class="checkbox">
+              <div class="member_type">
                 <label>
                   <input type="radio" id="user" name="identity" value="user" required/>
                   我是顧客
@@ -353,7 +369,7 @@
                   我是賣家
                 </label>
               </div>
-              <input type="submit" class="signup-button" value="成為會員！" style="font-weight: 600; cursor: pointer">
+              <input type="submit" class="login-1stButton" value="成為會員！" style="font-weight: 600; cursor: pointer">
             </form>   
         {% with messages = get_flashed_messages() %} {% if messages %}
         <script>
@@ -370,11 +386,11 @@
             />
           </div>
 
-          <div class="text">
+          <div class="text2">
             <h2 style="font-weight: 900; margin-top: 30px">已經有帳號？</h2>
             <div
               class="login-button"
-              onclick="window.location.href='Login'"
+              onclick="window.location.href='login'"
               style="cursor: pointer"
             >
               登入

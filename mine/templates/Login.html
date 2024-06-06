@@ -31,9 +31,9 @@
       .centered-div {
         background-color: white; /* 白色背景 */
         width: 450px; /* 設定寬度 */
-        height: 610px; /* 設定高度 */
+        height: 640px; /* 設定高度 */
         position: absolute; /* 使用絕對定位 */
-        margin-top: 300px;
+        margin-top: 320px;
         left: 50%; /* 水平居中 */
         transform: translate(-50%, -50%); /* 使容器居中 */
         padding: 20px; /* 增加內邊距 */
@@ -74,15 +74,6 @@
         text-decoration: none;
         margin-left: 30px;
       }
-      .login-button {
-        background-color: #727d6b;
-        border-radius: 5px;
-        color: white;
-        padding: 10px;
-        text-align: center;
-        margin: 30px;
-        margin-bottom: 0px;
-      }
       .signup-button {
         background-color: #ffffff;
         border: 1px solid #727d6b;
@@ -103,13 +94,13 @@
         display: flex; /* 使用 flexbox 佈局 */
         justify-content: center; /* 水平居中 */
         align-items: center; /* 垂直居中 */
-        margin-top: 50px;
+        margin-top: 30px;
         /*margin-top: 30px;*/
       }
       .form-container {
         background-color: transparent; /* 白色背景 */
         width: 450px; /* 設定寬度 */
-        height: 680px; /* 設定高度 */
+        height: 700px; /* 設定高度 */
         position: absolute; /* 使用絕對定位 */
         margin-top: 400px;
         left: 50%; /* 水平居中 */
@@ -121,7 +112,7 @@
         height: auto; /* 自动调整父容器的高度 */
         display: flex;
         flex-direction: column; /* 子元素按列排列 */
-        min-height: 680px; /* 至少填满视口高度 */
+        min-height: 690px; /* 至少填满视口高度 */
       }
       .isfarmer {
         text-align: right;
@@ -372,9 +363,9 @@
                 我是賣家
               </label>
             </div>
-            <a class = "for_pwd"href="#">忘記密碼?</a>
+            <a class = "for_pwd" href="{{ url_for('reset_request') }}">忘記密碼?</a>
             <br>
-            <input type="submit" class="login-button" value="登入 MissGreen !" style="font-weight: 600; cursor: pointer">
+            <input type="submit" class="login-1stButton" value="登入 MissGreen !" style="font-weight: 600; cursor: pointer">
           </form>
           {% with messages = get_flashed_messages() %} {% if messages %}
           <script>
