@@ -33,7 +33,7 @@
         float: ri;
       }
       .breadcrumb_list {
-        margin-left: 200px;
+        margin-left: 155px;
         margin-top: 30px;
         margin-bottom: 0px;
       }
@@ -45,9 +45,8 @@
         display: flex;
         flex-wrap: wrap; /* 允许换行 */
         justify-content: flex-start; /* 靠左对齐 */
-        margin-left: 100px;
         margin-top: 30px;
-        width: calc(100% - 200px); /* 调整宽度，减去左边距 */
+        width: calc(100% - 10px); /* 调整宽度，减去左边距 */
       }
       div.item-container div {
         width: 25%;
@@ -74,14 +73,6 @@
       }
       .nav_container {
         display: flex;
-      }
-      .side_nav {
-        margin-left: 0px;
-        margin-top: 0px;
-        flex: 1;
-        padding-left: 20px;
-        width: 8%;
-        float: left;
       }
       .side_nav a {
         display: block;
@@ -151,9 +142,17 @@
         display: block; /* 当类为 visible 时显示容器 */
       }
       .parent-container {
+        display: grid;
+        grid-template-columns: 1fr 13fr; /* 设置两个网格列,比例为 1:5 */
         width: 100%;
-        display: flex;
-        justify-content: space-between; /* 在兩個盒子之間分配空間 */
+      }
+      .side_nav {
+        /*background-color: rgb(210, 150, 150);*/
+        margin-left: 20px;
+      }
+
+      .products {
+        /*background-color: rgb(167, 167, 239);*/
       }
     </style>
   </head>
@@ -250,6 +249,19 @@
             </li>
           </ul>
         </div>
+        <div class="search">
+          <form class="d-flex" role="search" action="/search" method="get">
+            <input
+              class="form-control me-2"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+              name="query"
+            />
+            <button class="btn btn-outline-success" type="submit" onclick="window.location.href='/search-products'">Search</button>
+          </form>
+        </div>
+
         {% if current_user.is_authenticated %}
         <div class="dropdown">
           <a

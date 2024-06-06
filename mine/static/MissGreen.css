@@ -180,4 +180,20 @@ footer {
 .card{
   margin-right: 80px;
 }
+.login-1stButton {
+  background-color: #727d6b;
+  border-radius: 5px;
+  border: 1px solid transparent; /* 取消边框 */
+  transition: none; /* 取消过渡效果 */
+  color: white;
+  padding: 10px;
+  text-align: center;
+  margin: 30px;
+  margin-top: 10px;
+  margin-bottom: 0px;
+  width: 350px;
+}
+.search{
+  margin-right: 20px;
+}
 
