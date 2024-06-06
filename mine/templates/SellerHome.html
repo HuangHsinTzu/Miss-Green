@@ -100,26 +100,18 @@
         </tr>
       </thead>
       <tbody>
+        {% for order in orders %}
         <tr>
-          <th scope="row">5439850q</th>
-          <td>2024/5/6 19:51:23</td>
-          <td>有機馬鈴薯*4<br />有機地瓜*5</td>
-          <td>$320</td>
-          <td>卡翹</td>
-          <td>桃園市中壢區中大路300號</td>
-          <td>信用卡</td>
-          <td>配送中</td>
+          <td>{{ order.order_number }}</td>
+          <td>{{ order.order_date}}</td>
+          <td>{{ order.product_name }} x {{ order.quantity }}</td>
+          <td>{{ order.total_price }}</td>
+          <td>{{ order.customer_name }}</td>
+          <td>{{ order.shipping_address }}</td>
+          <td>{{ order.payment_method }}</td>
+          <td>{{ order.status }}</td>
         </tr>
-        <tr>
-          <th scope="row">5435350q</th>
-          <td>2024/5/6 20:51:23</td>
-          <td>有機馬鈴薯*4<br />有機地瓜*5</td>
-          <td>$320</td>
-          <td>卡翹</td>
-          <td>桃園市中壢區中大路300號</td>
-          <td>信用卡</td>
-          <td>配送中</td>
-        </tr>
+        {% endfor %}
       </tbody>
     </table>
     <script

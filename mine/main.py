@@ -17,6 +17,9 @@ from flask_migrate import Migrate
 
 import os
 import traceback
+import random
+import string
+
 
 #  取得目前文件資料夾路徑
 base_dir = os.path.abspath(os.path.dirname(__file__))
@@ -63,7 +66,28 @@ def home():
 #農夫首頁(訂單管理)
 @app.route('/SellerHome')
 def sellerHome():
-    return render_template('SellerHome.html')
+    farmer_id = current_user.get_id() 
+    orders = db.session.query(Order, Product.name.label('product_name')) \
+                       .join(Product, Order.product_id == Product.id) \
+                       .filter(Product.farmer_id == farmer_id) \
+                       .all()
+    print(orders)
+    
+    formatted_orders = []
+    
+    for order, product_name in orders:
+        formatted_orders.append({
+            'order_number':order.order_number,
+            'order_date': order.order_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'total_price': order.total_price,
+            'product_name': product_name,
+            'quantity': order.quantity,
+            'customer_name': order.customer_name,
+            'shipping_address': order.shipping_address,
+            'payment_method': order.payment_method,
+            'status': order.status
+        })
+    return render_template('SellerHome.html', orders=formatted_orders)
 
 #登入頁面
 @app.route('/login',methods=['GET','POST'])
@@ -127,7 +151,28 @@ def showMember():
     is_logged_in = 'user_id' in session
     user_id = current_user.get_id()
     member = User.query.get(user_id)  # 從資料庫中獲取該會員的資訊
-    return render_template('Member.html', name=member.username, phone=member.phone, email=member.email, is_logged_in=is_logged_in)
+     # 获取用户的购买记录
+    records = db.session.query(Record, Product, Order)\
+                        .join(Product, Record.product_id == Product.id)\
+                        .join(Order, (Record.product_id == Order.product_id) & (Record.user_id == Order.user_id))\
+                        .filter(Record.user_id == user_id)\
+                        .all()
+
+    print(records)
+    seen_records = set()
+
+    purchase_history = []
+    for record, product, order in records:
+      if record.id not in seen_records:
+        seen_records.add(record.id)
+        purchase_history.append({
+            'order_date': order.order_date,
+            'product_name': product.name,
+            'quantity': record.quantity,
+            'total_price': order.total_price
+        })
+
+    return render_template('Member.html', name=member.username, phone=member.phone, email=member.email, is_logged_in=is_logged_in, purchase_history=purchase_history)
 
 #註冊
 @app.route('/Signup',methods=['GET','POST']) #POST接收RegistrationForm表單的資料
@@ -636,7 +681,7 @@ def remove_from_cart():
 
 #呈現使用者購物車內容
 @app.route('/Checkout', methods=['GET', 'POST'])
-def checkout():
+def shoppingCart():
     user_id = current_user.get_id()
     shopping_cart = ShoppingCart.query.filter_by(buyer_id=user_id).first()
     if shopping_cart:
@@ -655,6 +700,81 @@ def item_to_dict(item):
         'price':item.price,
         'quantity':item.quantity,
     }
+
+#購買商品
+@app.route('/Pay', methods=['GET', 'POST'])
+def pay():
+    user_id = current_user.get_id()
+    selected_products = request.json.get('selected_products')
+    customer_name = request.json.get('name')
+    print(selected_products)
+    print(customer_name)
+    out_of_stock = {}
+
+    cart = ShoppingCart.query.filter_by(buyer_id=user_id).first()  # 假設使用了 Flask-Login 並且已登入
+
+    if not cart:
+        return jsonify({"success": False, "message": "購物車不存在"}), 400
+
+    for product_info in selected_products:
+        product_id = product_info['product_id']
+        quantity = product_info['quantity']
+
+        product = Product.query.get(product_id)
+        if product:
+            if product.quantity >= quantity:
+                product.quantity -= quantity
+                order_number = generate_order_number()  # 根据需要自行实现订单编号生成逻辑
+                total_price = product.price * quantity
+                customer_name = request.json.get('name')  # 或者从前端传递的用户信息中获取
+                shipping_address = request.json.get('address')  # 或者从前端传递的用户信息中获取
+                payment_method = request.json.get('payment_method')  # 或者从前端传递的用户信息中获取
+
+                new_order = Order(
+                    order_number=order_number,
+                    total_price=total_price,
+                    customer_name=customer_name,
+                    shipping_address=shipping_address,
+                    payment_method=payment_method,
+                    product_id=product_id,
+                    quantity=quantity,
+                    user_id=user_id
+                )
+                db.session.add(new_order)
+
+                new_record = Record(
+                    user_id=user_id,
+                    product_id=product_id,
+                    quantity=quantity
+                )
+                db.session.add(new_record)
+
+                db.session.commit()
+
+                remove = cart.remove_item(product_id)
+            else:
+                out_of_stock[product_id] = {'name': product.name, 'stock': product.quantity}
+        else:
+            return jsonify({"success": False, "message": f"商品已下架"}), 400
+
+    if out_of_stock:
+        db.session.rollback()  # 回滚数据库更改
+        return jsonify({"success": False, "out_of_stock": out_of_stock}), 400
+
+    db.session.commit()
+    return jsonify({"success": True})
+
+def generate_order_number():#訂單編號
+    # 生成前面五位数
+    first_five_digits = ''.join(random.choices(string.digits, k=5))
+
+    # 生成后两位字母
+    last_two_letters = ''.join(random.choices(string.ascii_lowercase, k=2))
+
+    # 拼接订单号
+    order_number = f"{first_five_digits}-{last_two_letters}"
+
+    return order_number
 
 # 啟動app
 if __name__ == "__main__":

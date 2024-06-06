@@ -180,18 +180,32 @@ class Record(db.Model):
         self.product_id = product_id
         self.quantity = quantity
 
-#訂單
 class Order(db.Model):
     __tablename__ = 'orders'
 
     id = db.Column(db.Integer, primary_key=True)
+    order_number = db.Column(db.String(20), nullable=False, unique=True)
+    order_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    total_price = db.Column(db.Float, nullable=False)
+    customer_name = db.Column(db.String(128), nullable=False)
+    shipping_address = db.Column(db.String(256), nullable=False)
+    payment_method = db.Column(db.String(64), nullable=False)
+    status = db.Column(db.String(64), nullable=False, default="配送中")
+
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-    order_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
-    def __init__(self, product_id, quantity):
+    def __init__(self, order_number, total_price, customer_name, shipping_address, payment_method, product_id, quantity, user_id):
+        self.order_number = order_number
+        self.total_price = total_price
+        self.customer_name = customer_name
+        self.shipping_address = shipping_address
+        self.payment_method = payment_method
         self.product_id = product_id
         self.quantity = quantity
+        self.user_id = user_id
+        self.order_date = datetime.utcnow()
 
 #活動
 class Activity(db.Model):
