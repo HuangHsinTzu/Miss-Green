@@ -362,8 +362,8 @@ def reload():
             filename = secure_filename(image_file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             image_file.save(file_path)
-            product.image_url = url_for('uploaded_file', filename=filename, _external=True)
-
+            product.image_url = f"/static/resources/{filename}"
+            
         # 提交到数据库
         db.session.commit()
 
@@ -426,7 +426,7 @@ def add_activities():
         if image_file and allowed_file(image_file.filename):
             filename = image_file.filename
             image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            image_url = url_for('uploaded_file', filename=filename, _external=True)
+            image_url = f"/static/resources/{filename}"
         
             try:
             # 添加商品到数据库
@@ -505,7 +505,7 @@ def update_activity():
         filename = secure_filename(image_file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         image_file.save(file_path)
-        activity.image_url = url_for('uploaded_file', filename=filename, _external=True)
+        activity.image_url = f"/static/resources/{filename}"
 
     db.session.commit()
     return jsonify({'success': True})
