@@ -232,7 +232,7 @@ class Activity(db.Model):
         self.description = description
         self.farmer_id = farmer_id
         self.status = status
-
+#eee
 #活動報名
 class Activities_reg_rec(UserMixin, db.Model):
     __tablename__ = 'activities_reg_rec'
