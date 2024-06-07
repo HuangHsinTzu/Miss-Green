@@ -399,7 +399,7 @@ def delete_product():
         return jsonify({'message': '商品删除成功'}), 200
     else:
         return jsonify({'error': '未找到要删除的商品'}), 404
-
+#hjtjt
 #上架活動
 @app.route('/Add_activities', methods = ['GET', 'POST'])
 def add_activities():
