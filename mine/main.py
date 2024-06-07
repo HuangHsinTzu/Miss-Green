@@ -34,7 +34,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + \
     os.path.join(base_dir, 'data.sqlite')
 
 # 定义上传文件夹的路径
-UPLOAD_FOLDER = os.path.join(base_dir, 'pictures')
+UPLOAD_FOLDER = os.path.join(base_dir, 'static/resources')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -291,7 +291,7 @@ def upload():
         if image_file and allowed_file(image_file.filename):
             filename = image_file.filename
             image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            image_url = url_for('uploaded_file', filename=filename, _external=True)
+            image_url = f"/static/resources/{filename}"
             
             try:
             # 添加商品到数据库
@@ -318,7 +318,7 @@ def upload():
         return render_template('Upload.html', farmer_products=farmer_products)
 
 #上傳圖片
-@app.route('/uploads/<filename>')
+@app.route('/static/resources/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
