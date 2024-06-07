@@ -414,7 +414,7 @@ def add_activities():
         fee = request.form['fee']
         description = request.form['description']
         image_file = request.files['image']
-        status = 1
+        status = "進行中"
         
         # 检查数据是否有效
         if not all([activityname, date, location, fee, description]) or not image_file:
@@ -430,7 +430,7 @@ def add_activities():
         
             try:
             # 添加商品到数据库
-                new_activity = farmer.add_activity(image_url, activityname, event_date, location, fee, description)
+                new_activity = farmer.add_activity(image_url, activityname, event_date, location, fee, description, status)
                 db.session.commit()
             except IntegrityError as e:
                 db.session.rollback()

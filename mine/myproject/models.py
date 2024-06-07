@@ -223,7 +223,7 @@ class Activity(db.Model):
     farmer_id = db.Column(db.Integer, db.ForeignKey('farmers.id'), nullable=False)
 
 
-    def __init__(self, image_url, name, event_date, location, fee, description, farmer_id):
+    def __init__(self, image_url, name, event_date, location, fee, description, farmer_id, status):
         self.image_url = image_url
         self.name = name
         self.event_date = event_date
@@ -231,6 +231,7 @@ class Activity(db.Model):
         self.fee = fee
         self.description = description
         self.farmer_id = farmer_id
+        self.status = status
 
 #活動報名
 class Activities_reg_rec(UserMixin, db.Model):
