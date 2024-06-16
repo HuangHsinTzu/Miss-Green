@@ -448,7 +448,7 @@ def add_activities():
 
     else:    
         # 獲取該農夫上架的所有商品
-        farmer_activities = farmer.activities.all()
+        farmer_activities = farmer.activities.filter(Activity.status != '已取消').all()
         return render_template('AddActivities.html', farmer_activities=farmer_activities)
 #eee
 #農夫編輯活動取得原始資料
